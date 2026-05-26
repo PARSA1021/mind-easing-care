@@ -25,7 +25,7 @@ const state = {
   messagePool: JSON.parse(localStorage.getItem("sync_card_pool_v2")) || [
     { text: "오늘 하루도 정말 고생 많았어요. 내가 늘 옆에 있을게요.", author: "system", likes: 0 },
     { text: "잠시 눈을 감고 깊게 숨을 쉬어봐요. 당신은 충분히 잘하고 있어요.", author: "system", likes: 0 },
-    { text: "어떤 일이 있어도 우리는 함께니까 괜찮아요.", author: "system", likes: 0 },
+    { text: "어떤 일이 있어도 우리는 늘 함께니까 괜찮아요.", author: "system", likes: 0 },
   ],
   isMeditating: false,
   meditationTimer: null,
@@ -76,24 +76,70 @@ function initAudio() {
   }
 }
 
-function playNotificationSound() {
+function playNotificationSound(type = 'default') {
   initAudio();
   const ctx = state.audioCtx;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
-  osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5); // A4
+  
+  if (type === 'signal') {
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.8);
+  } else if (type === 'like') {
+    osc.frequency.setValueAtTime(660, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+  } else {
+    osc.frequency.setValueAtTime(554, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.4);
+  }
 
   gain.gain.setValueAtTime(0.1, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (type === 'signal' ? 0.8 : 0.4));
 
   osc.connect(gain);
   gain.connect(ctx.destination);
 
   osc.start();
-  osc.stop(ctx.currentTime + 0.5);
+  osc.stop(ctx.currentTime + (type === 'signal' ? 0.8 : 0.4));
+}
+
+function showNotificationBanner(title, body, iconClass = 'ti ti-bell-bolt') {
+  const banner = document.getElementById("notificationBanner");
+  const titleEl = document.getElementById("notifBannerTitle");
+  const bodyEl = document.getElementById("notifBannerBody");
+  const iconEl = document.getElementById("notifBannerIcon").querySelector("i");
+
+  if (!banner || !titleEl || !bodyEl || !iconEl) return;
+
+  titleEl.textContent = title;
+  bodyEl.textContent = body;
+  iconEl.className = iconClass;
+
+  banner.classList.add("active");
+  
+  if (banner.timeout) clearTimeout(banner.timeout);
+  banner.timeout = setTimeout(() => {
+    banner.classList.remove("active");
+  }, 4000);
+}
+
+function createGlobalParticle(emoji = '❤️') {
+  const particle = document.createElement("div");
+  particle.className = "global-particle";
+  particle.textContent = emoji;
+  
+  // Random horizontal position
+  particle.style.left = `${20 + Math.random() * 60}%`;
+  particle.style.top = `${40 + Math.random() * 40}%`;
+  
+  // Random horizontal drift
+  const dx = (Math.random() - 0.5) * 200;
+  particle.style.setProperty("--dx", `${dx}px`);
+  
+  document.body.appendChild(particle);
+  setTimeout(() => particle.remove(), 2000);
 }
 
 function registerServiceWorker() {
@@ -167,14 +213,14 @@ function applyIdentity(role) {
 
   if (role === "wife") {
     label.textContent = "🌸 아내";
-    partnerName.textContent = "남편 상태";
+    partnerName.textContent = "사랑하는 남편";
     partnerAvatar.className = "ti ti-user-heart";
-    if (homeTitle) homeTitle.innerHTML = "남편에게 당신의<br />마음을 전해볼까요?";
+    if (homeTitle) homeTitle.innerHTML = "남편에게 당신의<br />다정한 마음을 전해볼까요?";
   } else {
     label.textContent = "🙋‍♂️ 남편";
-    partnerName.textContent = "아내 상태";
+    partnerName.textContent = "사랑하는 아내";
     partnerAvatar.className = "ti ti-user-heart";
-    if (homeTitle) homeTitle.innerHTML = "아내에게 당신의<br />온기를 전해볼까요?";
+    if (homeTitle) homeTitle.innerHTML = "아내에게 당신의<br />따뜻한 온기를 전해볼까요?";
   }
   
   // 역할 변경 시 상대방 기분 다시 로드
@@ -247,29 +293,81 @@ function toggleTheme() {
 function initRealtimeSync() {
   if (!state.db) return;
 
-  // 온라인 상태 업데이트
-  const presenceRef = ref(state.db, `presence/${state.identity}`);
-  set(presenceRef, true);
-  onDisconnect(presenceRef).remove();
+  // 1. 앱 연결 상태 감시 (.info/connected)
+  const connectedRef = ref(state.db, ".info/connected");
+  onValue(connectedRef, (snap) => {
+    const isConnected = snap.val() === true;
+    updateSyncStatusUI(isConnected);
+  });
 
-  // 상대방 온라인 상태 감시
+  // 2. 온라인 상태 및 마지막 활동 업데이트
+  const presenceRef = ref(state.db, `presence/${state.identity}`);
+  const lastActiveRef = ref(state.db, `last_active/${state.identity}`);
+  
+  set(presenceRef, true);
+  set(lastActiveRef, serverTimestamp());
+  onDisconnect(presenceRef).remove();
+  onDisconnect(lastActiveRef).set(serverTimestamp());
+
+  // 3. 상대방 온라인 상태 및 활동 시간 감시
   const partner = state.identity === "wife" ? "husband" : "wife";
   const partnerPresenceRef = ref(state.db, `presence/${partner}`);
+  const partnerLastActiveRef = ref(state.db, `last_active/${partner}`);
+
   onValue(partnerPresenceRef, (snap) => {
     const isOnline = snap.val();
     const avatar = document.querySelector(".partner-avatar");
     if (avatar) avatar.classList.toggle("pulse", !!isOnline);
   });
 
-  // 카드 동기화
+  onValue(partnerLastActiveRef, (snap) => {
+    const timestamp = snap.val();
+    updateLastActiveUI(timestamp);
+  });
+
+  // 4. 카드 동기화
   const cardsRef = ref(state.db, "sync_comfort_cards");
+  let isInitialLoad = true;
   onValue(cardsRef, (snap) => {
+    flashSyncIndicator();
     const data = snap.val();
+    const oldPoolSize = state.messagePool.length;
+    
     if (data) {
-      state.messagePool = Object.keys(data).map((k) => ({ id: k, ...data[k] }));
+      const newPool = Object.keys(data).map((k) => ({ id: k, ...data[k] }));
+      
+      // 새 메시지 알림 (초기 로딩 이후에만)
+      if (!isInitialLoad && newPool.length > oldPoolSize) {
+        const lastCard = newPool[newPool.length - 1];
+        if (lastCard.author !== state.identity) {
+          const authorName = lastCard.author === "wife" ? "아내" : "남편";
+          showNotificationBanner("새로운 위로 도착", `${authorName}의 따뜻한 마음이 도착했어요.`, "ti ti-message-heart");
+          playNotificationSound('message');
+          triggerTabNotifyAnim(3);
+        }
+      }
+
+      // 좋아요 알림 감지
+      if (!isInitialLoad) {
+        newPool.forEach(newCard => {
+          const oldCard = state.messagePool.find(c => c.id === newCard.id);
+          if (oldCard && (newCard.likes || 0) > (oldCard.likes || 0)) {
+            // 내가 쓴 카드에 좋아요가 눌렸을 때만 알림
+            if (newCard.author === state.identity) {
+              const partnerName = state.identity === "wife" ? "남편" : "아내";
+              showNotificationBanner("마음 전달 완료", `${partnerName}이 당신의 위로에 공감했어요.`, "ti ti-heart-filled");
+              playNotificationSound('like');
+              for(let i=0; i<5; i++) setTimeout(() => createGlobalParticle('❤️'), i * 100);
+            }
+          }
+        });
+      }
+
+      state.messagePool = newPool;
       localStorage.setItem("sync_card_pool_v2", JSON.stringify(state.messagePool));
       renderCardScreen();
     }
+    isInitialLoad = false;
   });
 
   // 호출 신호 감시
@@ -279,20 +377,37 @@ function initRealtimeSync() {
     if (val && val.status === "trigger") {
       if (Date.now() - val.time < 5000) {
         openSignalOverlay();
-        playNotificationSound();
-        if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+        playNotificationSound('signal');
+        if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
+        for(let i=0; i<10; i++) setTimeout(() => createGlobalParticle('✨'), i * 150);
       }
     }
   });
 
   // 상대방 기분 감시
   const moodRef = ref(state.db, `sync_mood/${partner}`);
+  let lastMood = null;
   onValue(moodRef, (snap) => {
+    flashSyncIndicator();
     const mood = snap.val();
     if (mood) {
+      if (lastMood && lastMood !== mood) {
+        const partnerName = state.identity === "wife" ? "남편" : "아내";
+        showNotificationBanner("기분 변화 감지", `${partnerName}의 기분이 [${MOOD_MAP[mood]}] (으)로 바뀌었어요.`, "ti ti-mood-smile");
+        playNotificationSound('default');
+      }
       updatePartnerMoodUI(mood);
+      lastMood = mood;
     }
   });
+}
+
+function triggerTabNotifyAnim(tabIdx) {
+  const tabs = document.querySelectorAll(".tab-item");
+  if (tabs[tabIdx]) {
+    tabs[tabIdx].classList.add("notify-anim");
+    setTimeout(() => tabs[tabIdx].classList.remove("notify-anim"), 3000);
+  }
 }
 
 // ─── Mood Management ───
@@ -336,7 +451,7 @@ function updatePartnerMoodUI(mood) {
     busy: "지금 아주 바쁜 상태예요",
     love: "당신을 아주 많이 사랑한대요"
   };
-  desc.textContent = moodDescMap[mood] || "함께 마음을 나눠보세요";
+  desc.textContent = moodDescMap[mood] || "함께 따뜻한 마음을 나눠보세요";
 }
 
 function openSignalOverlay() {
@@ -368,8 +483,7 @@ function openSignalOverlay() {
 
 function closeSignalOverlay() {
   const overlay = document.getElementById("signalArrivalOverlay");
-  overlay.classList.remove("active");
-  // 신호 확인 후 카드로 바로 이동시켜주는 UX
+  if (overlay) overlay.classList.remove("active");
   navigateTab('cards');
 }
 
@@ -389,15 +503,15 @@ function sendSignalToPartner() {
       status: "trigger",
       time: Date.now(),
     }).then(() => {
-      showToast("상대방에게 마음을 전했습니다. ✨");
+      showToast("배우자에게 따뜻한 위로 신호를 보냈어요. ✨");
       setTimeout(() => { btn.disabled = false; }, 3000); // 3초 쿨다운
     }).catch((err) => {
       console.error("Signal send failed:", err);
-      showToast("신호 전송에 실패했습니다. 다시 시도해주세요.");
+      showToast("신호 전송에 실패했어요. 다시 시도해볼까요?");
       btn.disabled = false;
     });
   } else {
-    showToast("연결 상태가 불안정합니다. 확인 중... 🛰️");
+    showToast("지금은 연결 상태가 조금 불안정해요. 🛰️");
   }
 }
 
@@ -457,76 +571,79 @@ function updateTabIndicator(idx) {
   }
 }
 
-// ─── Meditation (Breath) ───
+// ─── Breathing Logic ───
 function handleBreathToggle() {
   const btn = document.getElementById("breath-action-btn");
   if (state.isMeditating) {
     stopMeditation();
-    btn.textContent = "호흡 시작";
+    btn.textContent = "호흡 가이드 다시 시작";
   } else {
     startMeditation();
-    btn.textContent = "그만하기";
+    btn.textContent = "잠시 멈추기";
   }
 }
 
 function startMeditation() {
   state.isMeditating = true;
   const circle = document.getElementById("breath-circle");
-  const text = document.getElementById("breath-title");
+  const desc = document.getElementById("breath-desc");
   
-  const cycle = () => {
+  function breathCycle() {
     if (!state.isMeditating) return;
     
     // Inhale
-    circle.className = "breath-circle inhale";
-    text.textContent = "숨을 깊게 들이마셔요";
+    if (desc) desc.textContent = "숨을 천천히 깊게 들이마셔요...";
+    if (circle) {
+      circle.style.transform = "scale(1.5)";
+      circle.style.opacity = "0.8";
+    }
     
     state.meditationTimer = setTimeout(() => {
       if (!state.isMeditating) return;
-      // Exhale
-      circle.className = "breath-circle exhale";
-      text.textContent = "천천히 내뱉으세요";
       
-      state.meditationTimer = setTimeout(cycle, 4000);
+      // Exhale
+      if (desc) desc.textContent = "이제 편안하게 내뱉으세요...";
+      if (circle) {
+        circle.style.transform = "scale(1.0)";
+        circle.style.opacity = "0.3";
+      }
+      
+      state.meditationTimer = setTimeout(breathCycle, 4000);
     }, 4000);
-  };
+  }
   
-  cycle();
+  breathCycle();
 }
 
 function stopMeditation() {
   state.isMeditating = false;
   clearTimeout(state.meditationTimer);
   const circle = document.getElementById("breath-circle");
-  const text = document.getElementById("breath-title");
-  circle.className = "breath-circle";
-  text.textContent = "마음을 가라앉히는 시간";
+  const desc = document.getElementById("breath-desc");
+  
+  if (circle) {
+    circle.style.transform = "scale(1.0)";
+    circle.style.opacity = "0.3";
+  }
+  if (desc) desc.textContent = "언제든 마음의 안정이 필요할 때 다시 찾아주세요.";
 }
 
 // ─── Dumping Logic ───
 function executeTextDumping() {
-  const textarea = document.getElementById("dump-textarea-input");
-  const text = textarea.value.trim();
-  
-  if (!text) {
-    showToast("지우고 싶은 마음을 적어주세요.");
+  const input = document.getElementById("dump-textarea-input");
+  if (!input || !input.value.trim()) {
+    showToast("비우고 싶은 마음을 먼저 적어주세요.");
     return;
   }
 
-  // Animation: Text flying away
-  textarea.style.transition = "all 0.8s var(--ease-in)";
-  textarea.style.transform = "translateY(-100vh) scale(0.5)";
-  textarea.style.opacity = "0";
-
-  setTimeout(() => {
-    textarea.value = "";
-    textarea.style.transition = "none";
-    textarea.style.transform = "";
-    textarea.style.opacity = "1";
-    setTimeout(() => (textarea.style.transition = ""), 10);
-    
-    showToast("불안한 마음을 하늘로 날려보냈습니다. ✨");
-  }, 800);
+  const text = input.value;
+  input.value = "";
+  
+  // 시각적 피드백: 텍스트가 날아가는 효과 (간단 구현)
+  showToast("복잡한 마음들을 하늘로 멀리 날려보냈어요. ✨");
+  
+  // 활동 기록
+  updateActivityTimestamp();
 }
 
 // ─── Comfort Cards ───
@@ -570,7 +687,7 @@ function renderListView() {
           <p class="list-card-text">${card.text}</p>
           <div class="list-card-footer">
             <span class="list-card-author ${isMe ? 'is-me' : ''}">
-              ${card.author === "system" ? "Healing Message" : (isMe ? "내가 쓴 위로" : `${card.author === "wife" ? "아내" : "남편"}의 위로`)}
+              ${card.author === "system" ? "Healing Message" : (isMe ? "내가 남긴 마음" : `${card.author === "wife" ? "아내" : "남편"}의 위로`)}
             </span>
             <span class="list-card-likes"><i class="ti ti-heart-filled"></i> ${card.likes || 0}</span>
           </div>
@@ -692,7 +809,7 @@ function submitComfortMessage() {
   const msg = input.value.trim();
   
   if (!msg) {
-    showToast("마음을 담은 메시지를 적어주세요.");
+    showToast("마음을 담은 메시지를 먼저 적어주세요.");
     return;
   }
 
@@ -708,12 +825,12 @@ function submitComfortMessage() {
     const cardsRef = ref(state.db, "sync_comfort_cards");
     push(cardsRef, newMessage)
       .then(() => {
-        showToast("메시지가 저장되었습니다.");
+        showToast("소중한 마음이 잘 저장되었습니다. ✨");
         closeMessageModal();
       })
       .catch((err) => {
         console.error("Card save failed:", err);
-        showToast("저장에 실패했습니다. 다시 시도해주세요.");
+        showToast("저장에 실패했어요. 다시 시도해볼까요?");
       })
       .finally(() => {
         btn.disabled = false;
@@ -731,8 +848,9 @@ function submitComfortMessage() {
 }
 
 function sendHeart() {
-  showToast("배우자에게 사랑을 보냈습니다. ❤️");
-  if ("vibrate" in navigator) navigator.vibrate(100);
+  showToast("상대방에게 사랑을 가득 보냈어요! ❤️");
+  createHeartBurst(document.querySelector(".tab-item.active"));
+  updateActivityTimestamp();
 }
 
 // ─── UI Helpers ───
@@ -756,7 +874,57 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add("show");
   
+  // 활동 시간 업데이트 (인터랙션 발생 시)
+  updateActivityTimestamp();
+
   // 이전 타이머 제거 (연속 클릭 시)
   if (t.timeout) clearTimeout(t.timeout);
   t.timeout = setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ─── Health & Connectivity Helpers ───
+function updateSyncStatusUI(isConnected) {
+  const syncStatus = document.getElementById("syncStatus");
+  if (!syncStatus) return;
+
+  const label = syncStatus.querySelector(".status-label");
+  if (isConnected) {
+    syncStatus.classList.remove("offline");
+    label.textContent = "연결됨";
+  } else {
+    syncStatus.classList.add("offline");
+    label.textContent = "연결 끊김";
+  }
+}
+
+function updateLastActiveUI(timestamp) {
+  const el = document.getElementById("partnerLastActive");
+  if (!el || !timestamp) return;
+
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+
+  let timeStr = "";
+  if (diffInMinutes < 1) timeStr = "방금 전 활동";
+  else if (diffInMinutes < 60) timeStr = `${diffInMinutes}분 전 활동`;
+  else if (diffInMinutes < 1440) timeStr = `${Math.floor(diffInMinutes / 60)}시간 전 활동`;
+  else timeStr = "오래전 활동";
+
+  el.textContent = timeStr;
+}
+
+function updateActivityTimestamp() {
+  if (state.db) {
+    const lastActiveRef = ref(state.db, `last_active/${state.identity}`);
+    set(lastActiveRef, serverTimestamp());
+  }
+}
+
+function flashSyncIndicator() {
+  const syncStatus = document.getElementById("syncStatus");
+  if (!syncStatus) return;
+
+  syncStatus.classList.add("syncing");
+  setTimeout(() => syncStatus.classList.remove("syncing"), 1000);
 }

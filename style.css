@@ -188,10 +188,65 @@ html, body {
   box-shadow: 0 0 12px var(--primary);
 }
 
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
 .brand h1 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: #22C55E;
+  border-radius: 50%;
+  animation: statusPulse 2s infinite;
+}
+
+.sync-status.offline .status-dot {
+  background: #EF4444;
+  animation: none;
+}
+
+.sync-status.offline .status-label {
+  color: #EF4444;
+}
+
+.status-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #22C55E;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.sync-status.syncing .status-label {
+  color: var(--primary);
+  text-shadow: 0 0 8px var(--primary-soft);
+}
+
+.sync-status.syncing .status-dot {
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+}
+
+@keyframes statusPulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 .help-btn, .theme-toggle-btn {
@@ -428,6 +483,13 @@ html, body {
 
 .status-text h3 { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
 .status-text p { font-size: 13px; color: var(--text-sub); font-weight: 500; }
+.last-active { 
+  display: block;
+  font-size: 11px; 
+  color: var(--text-hint); 
+  margin-top: 4px;
+  font-weight: 500;
+}
 
 /* ─── Hero Section ─── */
 .hero-section {
@@ -1071,6 +1133,86 @@ textarea {
   border-radius: var(--radius-md);
   font-size: 16px;
   font-weight: 700;
+}
+
+/* ─── Notification Banner ─── */
+.notification-banner {
+  position: fixed;
+  top: calc(var(--safe-top) + 12px);
+  left: 20px;
+  right: 20px;
+  background: var(--bg-modal);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-glass);
+  z-index: 5000;
+  transform: translateY(-150%);
+  transition: transform 0.6s var(--spring);
+}
+
+.notification-banner.active {
+  transform: translateY(0);
+}
+
+.notif-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.notif-content {
+  flex: 1;
+}
+
+.notif-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.notif-body {
+  font-size: 13px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+/* ─── Global Floating Particles ─── */
+.global-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 6000;
+  font-size: 24px;
+  animation: floatUp 2s ease-out forwards;
+}
+
+@keyframes floatUp {
+  0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+  20% { opacity: 1; transform: translate(0, -20px) scale(1.2); }
+  100% { transform: translate(var(--dx), -150px) scale(0.8); opacity: 0; }
+}
+
+/* ─── Tab Animation ─── */
+@keyframes tabBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.tab-item.notify-anim i {
+  animation: tabBounce 0.6s 3 var(--spring);
+  color: var(--primary);
 }
 
 /* ─── Toast ─── */
