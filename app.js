@@ -22,12 +22,15 @@ const state = {
   identity: localStorage.getItem("app_user_identity") || "wife",
   theme: localStorage.getItem("app_theme") || "auto",
   messagePool: JSON.parse(localStorage.getItem("sync_card_pool_v2")) || [
-    { text: "오늘 하루도 정말 고생 많았어요. 내가 늘 옆에 있을게요.", author: "system" },
-    { text: "잠시 눈을 감고 깊게 숨을 쉬어봐요. 당신은 충분히 잘하고 있어요.", author: "system" },
-    { text: "어떤 일이 있어도 우리는 함께니까 괜찮아요.", author: "system" },
+    { text: "오늘 하루도 정말 고생 많았어요. 내가 늘 옆에 있을게요.", author: "system", likes: 0 },
+    { text: "잠시 눈을 감고 깊게 숨을 쉬어봐요. 당신은 충분히 잘하고 있어요.", author: "system", likes: 0 },
+    { text: "어떤 일이 있어도 우리는 함께니까 괜찮아요.", author: "system", likes: 0 },
   ],
   isMeditating: false,
   meditationTimer: null,
+  audioCtx: null,
+  currentCardId: null,
+  isListView: false,
 };
 
 // ─── Initialization ───
@@ -60,6 +63,35 @@ window.closeSignalOverlay = closeSignalOverlay;
 window.closeMessageModal = closeMessageModal;
 window.submitComfortMessage = submitComfortMessage;
 window.updateCharCount = updateCharCount;
+window.toggleLikeCard = toggleLikeCard;
+window.playNotificationSound = playNotificationSound;
+window.toggleCardView = toggleCardView;
+
+function initAudio() {
+  if (!state.audioCtx) {
+    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playNotificationSound() {
+  initAudio();
+  const ctx = state.audioCtx;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+  osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5); // A4
+
+  gain.gain.setValueAtTime(0.1, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  osc.stop(ctx.currentTime + 0.5);
+}
 
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -218,6 +250,7 @@ function initRealtimeSync() {
       // 본인이 보낸 신호가 아닌 경우에만 알림 (시간차 체크)
       if (Date.now() - val.time < 5000) {
         openSignalOverlay();
+        playNotificationSound();
         if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
       }
     }
@@ -227,8 +260,28 @@ function initRealtimeSync() {
 function openSignalOverlay() {
   const overlay = document.getElementById("signalArrivalOverlay");
   const senderName = document.getElementById("signalSenderName");
+  if (!overlay || !senderName) return;
+
   senderName.textContent = state.identity === "wife" ? "남편의 신호" : "아내의 신호";
   overlay.classList.add("active");
+  
+  // 시각적 강조: 화면 플래시 효과
+  const flash = document.createElement("div");
+  flash.className = "screen-flash";
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 1000);
+  
+  // 탭 바에 알림 뱃지 표시
+  const cardTab = document.querySelectorAll(".tab-item")[3];
+  if (cardTab) {
+    let badge = cardTab.querySelector(".tab-badge");
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "tab-badge";
+      cardTab.appendChild(badge);
+    }
+    badge.classList.add("active");
+  }
 }
 
 function closeSignalOverlay() {
@@ -304,6 +357,10 @@ function navigateTab(tabId) {
   tabs[targetIdx].setAttribute("aria-selected", "true");
 
   updateTabIndicator(targetIdx);
+
+  // 탭 이동 시 알림 뱃지 제거
+  const badge = tabs[targetIdx].querySelector(".tab-badge");
+  if (badge) badge.classList.remove("active");
 
   // 탭 이동 시 명상 중단
   if (tabId !== "breath" && state.isMeditating) {
@@ -394,17 +451,60 @@ function executeTextDumping() {
 function renderCardScreen() {
   const emptyState = document.getElementById("cards-empty-state");
   const cardMain = document.getElementById("comfort-card-main");
+  const cardList = document.getElementById("comfort-card-list");
 
-  if (!emptyState || !cardMain) return;
+  if (!emptyState || !cardMain || !cardList) return;
 
   if (state.messagePool.length === 0) {
     emptyState.style.display = "flex";
     cardMain.style.display = "none";
+    cardList.style.display = "none";
   } else {
     emptyState.style.display = "none";
-    cardMain.style.display = "flex";
-    drawNextComfortCard();
+    if (state.isListView) {
+      cardMain.style.display = "none";
+      cardList.style.display = "flex";
+      renderListView();
+    } else {
+      cardMain.style.display = "flex";
+      cardList.style.display = "none";
+      if (!state.currentCardId) drawNextComfortCard();
+      else updateCardUI();
+    }
   }
+}
+
+function renderListView() {
+  const container = document.getElementById("card-list-container");
+  if (!container) return;
+
+  container.innerHTML = state.messagePool
+    .slice()
+    .reverse()
+    .map((card) => {
+      const isMe = card.author === state.identity;
+      return `
+        <div class="list-card ${isMe ? 'is-me' : ''}">
+          <p class="list-card-text">${card.text}</p>
+          <div class="list-card-footer">
+            <span class="list-card-author ${isMe ? 'is-me' : ''}">
+              ${card.author === "system" ? "Healing Message" : (isMe ? "내가 쓴 위로" : `${card.author === "wife" ? "아내" : "남편"}의 위로`)}
+            </span>
+            <span class="list-card-likes"><i class="ti ti-heart-filled"></i> ${card.likes || 0}</span>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function toggleCardView() {
+  state.isListView = !state.isListView;
+  const btn = document.getElementById("viewToggleBtn");
+  if (btn) {
+    btn.querySelector("i").className = state.isListView ? "ti ti-layout-cards" : "ti ti-list";
+  }
+  renderCardScreen();
 }
 
 function drawNextComfortCard() {
@@ -414,18 +514,68 @@ function drawNextComfortCard() {
   }
   
   const card = state.messagePool[Math.floor(Math.random() * state.messagePool.length)];
+  state.currentCardId = card.id || card.text; // Use ID if available, otherwise fallback to text for system cards
+  updateCardUI();
+}
+
+function updateCardUI() {
+  const card = state.messagePool.find(c => (c.id || c.text) === state.currentCardId);
+  if (!card) return;
+
   const msgEl = document.getElementById("display-card-msg");
   const metaEl = document.getElementById("display-card-meta");
+  const likeCountEl = document.getElementById("cardLikeCount");
+  const likeBtn = document.getElementById("cardLikeBtn");
 
-  if (!msgEl || !metaEl) return;
+  if (!msgEl || !metaEl || !likeCountEl || !likeBtn) return;
 
   // Smooth change animation
   msgEl.style.opacity = "0";
   setTimeout(() => {
     msgEl.textContent = card.text;
     metaEl.textContent = card.author === "system" ? "Healing Message" : `${card.author === "wife" ? "아내" : "남편"}의 위로`;
+    likeCountEl.textContent = card.likes || 0;
+    
+    // Check if liked (using local storage for simple persistence per device)
+    const likedCards = JSON.parse(localStorage.getItem("liked_cards") || "[]");
+    const isLiked = likedCards.includes(state.currentCardId);
+    likeBtn.classList.toggle("liked", isLiked);
+    likeBtn.querySelector("i").className = isLiked ? "ti ti-heart-filled" : "ti ti-heart";
+    
     msgEl.style.opacity = "1";
   }, 300);
+}
+
+function toggleLikeCard() {
+  if (!state.currentCardId) return;
+
+  const likedCards = JSON.parse(localStorage.getItem("liked_cards") || "[]");
+  const isLiked = likedCards.includes(state.currentCardId);
+  
+  if (isLiked) {
+    likedCards.splice(likedCards.indexOf(state.currentCardId), 1);
+  } else {
+    likedCards.push(state.currentCardId);
+    if ("vibrate" in navigator) navigator.vibrate(50);
+  }
+  
+  localStorage.setItem("liked_cards", JSON.stringify(likedCards));
+
+  // Update Firebase or Local State
+  const cardIdx = state.messagePool.findIndex(c => (c.id || c.text) === state.currentCardId);
+  if (cardIdx > -1) {
+    const card = state.messagePool[cardIdx];
+    const newLikes = (card.likes || 0) + (isLiked ? -1 : 1);
+    
+    if (state.db && card.id) {
+      const cardRef = ref(state.db, `sync_comfort_cards/${card.id}/likes`);
+      set(cardRef, newLikes);
+    } else {
+      card.likes = newLikes;
+      localStorage.setItem("sync_card_pool_v2", JSON.stringify(state.messagePool));
+      updateCardUI();
+    }
+  }
 }
 
 function addComfortMessage() {
@@ -469,6 +619,7 @@ function submitComfortMessage() {
     text: msg,
     author: state.identity,
     time: serverTimestamp(),
+    likes: 0
   };
 
   if (state.db) {

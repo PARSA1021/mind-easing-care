@@ -643,6 +643,39 @@ textarea {
 .tab-item i { font-size: 24px; }
 .tab-item span { font-size: 11px; font-weight: 600; }
 
+.tab-badge {
+  position: absolute;
+  top: 12px;
+  right: 25%;
+  width: 8px;
+  height: 8px;
+  background: #FF4757;
+  border-radius: 50%;
+  border: 2px solid var(--bg-app);
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s var(--spring);
+}
+
+.tab-badge.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.screen-flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  z-index: 9999;
+  pointer-events: none;
+  animation: flashAnim 1s ease-out forwards;
+}
+
+@keyframes flashAnim {
+  0% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
 .tab-indicator {
   position: absolute;
   top: 0;
@@ -651,6 +684,123 @@ textarea {
   background: var(--primary);
   transition: transform 0.3s var(--spring);
   border-radius: 0 0 3px 3px;
+}
+
+/* ─── Comfort Card Enhancements ─── */
+.card-footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.card-like-btn {
+  background: var(--primary-soft);
+  border: none;
+  color: var(--primary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s var(--ease-standard);
+}
+
+.card-like-btn.liked {
+  background: var(--primary);
+  color: white;
+}
+
+.card-like-btn i { font-size: 14px; }
+
+/* ─── Card List View ─── */
+.card-list-view {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-app);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 0 4px;
+}
+
+.list-header {
+  padding: 16px 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-header h3 { font-size: 18px; font-weight: 700; }
+
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.list-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+
+.list-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s var(--ease-standard);
+}
+
+.list-card:active { transform: scale(0.98); }
+
+.list-card-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+
+.list-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-hint);
+}
+
+.list-card-author {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.modal-icon.notification {
+  background: #FFF9DB;
+  color: #FAB005;
+}
+
+.modal-content p strong {
+  color: var(--primary);
+}
+
+.list-card.is-me {
+  border-left: 4px solid var(--primary);
+  background: var(--primary-soft);
+}
+
+.list-card-author.is-me {
+  color: var(--text-sub);
 }
 
 /* ─── Modal ─── */

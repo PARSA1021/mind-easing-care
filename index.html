@@ -138,6 +138,9 @@
               <p id="display-card-msg">서로를 향한 따뜻한 한마디가<br />여기에 표시됩니다.</p>
               <div class="card-footer">
                 <span id="display-card-meta">Message for you</span>
+                <button class="card-like-btn" onclick="event.stopPropagation(); toggleLikeCard()" id="cardLikeBtn">
+                  <i class="ti ti-heart"></i> <span id="cardLikeCount">0</span>
+                </button>
               </div>
             </div>
             <div class="card-actions">
@@ -149,12 +152,31 @@
                 <i class="ti ti-plus" aria-hidden="true"></i>
               </button>
               <button
+                class="icon-btn"
+                onclick="toggleCardView()"
+                aria-label="목록 보기"
+                id="viewToggleBtn"
+              >
+                <i class="ti ti-list" aria-hidden="true"></i>
+              </button>
+              <button
                 class="icon-btn heart"
                 onclick="sendHeart()"
                 aria-label="하트 보내기"
               >
                 <i class="ti ti-heart" aria-hidden="true"></i>
               </button>
+            </div>
+
+            <!-- Card List View (Hidden by default) -->
+            <div id="comfort-card-list" class="card-list-view" style="display: none;">
+              <div class="list-header">
+                <h3>모든 마음들</h3>
+                <button class="text-btn" onclick="toggleCardView()">닫기</button>
+              </div>
+              <div id="card-list-container" class="list-container">
+                <!-- Cards will be rendered here -->
+              </div>
             </div>
           </div>
         </section>
@@ -234,9 +256,17 @@
             <h3>카드: 따뜻한 연결</h3>
             <p>서로에게 남긴 위로의 한마디를<br>확인하고 사랑을 전하세요.</p>
           </section>
+          <section class="guide-step">
+            <div class="modal-icon notification"><i class="ti ti-bell-bolt"></i></div>
+            <h3>알림 잘 받는 법</h3>
+            <p>1. 앱을 홈 화면에 <strong>'설치(추가)'</strong> 하기<br>
+               2. 브라우저 <strong>알림 권한</strong> 허용하기<br>
+               3. 배터리 최적화 제외 설정하기</p>
+          </section>
         </div>
         <div class="guide-pagination">
           <span class="dot active"></span>
+          <span class="dot"></span>
           <span class="dot"></span>
           <span class="dot"></span>
           <span class="dot"></span>
