@@ -52,11 +52,23 @@
         <section id="scr-summon" class="screen active" aria-labelledby="home-title">
           <div class="status-card">
             <div class="partner-avatar pulse" id="partnerPulse" aria-hidden="true">
-              <i class="ti ti-heart-filled"></i>
+              <i class="ti ti-user-heart"></i>
+              <div class="partner-mood-badge" id="partnerMoodBadge">✨</div>
             </div>
             <div class="status-text">
               <h3 id="partnerName">상대방</h3>
               <p id="partnerStatusDesc">연결을 확인하고 있어요</p>
+            </div>
+          </div>
+
+          <div class="mood-selector-zone">
+            <p class="section-label">지금 나의 기분은?</p>
+            <div class="mood-chips">
+              <button class="mood-chip" onclick="updateMyMood('fine')" data-mood="fine">😊 괜찮아요</button>
+              <button class="mood-chip" onclick="updateMyMood('tired')" data-mood="tired">😴 피곤해요</button>
+              <button class="mood-chip" onclick="updateMyMood('sad')" data-mood="sad">😢 우울해요</button>
+              <button class="mood-chip" onclick="updateMyMood('busy')" data-mood="busy">🔥 바빠요</button>
+              <button class="mood-chip" onclick="updateMyMood('love')" data-mood="love">💖 사랑해</button>
             </div>
           </div>
 

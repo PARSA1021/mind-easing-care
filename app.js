@@ -4,7 +4,7 @@
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, push, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, push, serverTimestamp, off, onDisconnect } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 
 // ─── Configuration & State ───
 const firebaseConfig = { 
@@ -21,6 +21,7 @@ const state = {
   db: null,
   identity: localStorage.getItem("app_user_identity") || "wife",
   theme: localStorage.getItem("app_theme") || "auto",
+  myMood: localStorage.getItem("app_user_mood") || "fine",
   messagePool: JSON.parse(localStorage.getItem("sync_card_pool_v2")) || [
     { text: "오늘 하루도 정말 고생 많았어요. 내가 늘 옆에 있을게요.", author: "system", likes: 0 },
     { text: "잠시 눈을 감고 깊게 숨을 쉬어봐요. 당신은 충분히 잘하고 있어요.", author: "system", likes: 0 },
@@ -38,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initFirebase();
   applyIdentity(state.identity);
   applyTheme(state.theme);
+  applyMoodUI(state.myMood);
   initRealtimeSync();
   setupEventListeners();
   checkFirstVisit();
@@ -49,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // 전역 함수로 등록 (HTML onclick 대응)
 window.switchIdentity = switchIdentity;
 window.toggleTheme = toggleTheme;
+window.updateMyMood = updateMyMood;
 window.sendSignalToPartner = sendSignalToPartner;
 window.navigateTab = navigateTab;
 window.handleBreathToggle = handleBreathToggle;
@@ -119,7 +122,7 @@ function setupEventListeners() {
   document.addEventListener("touchstart", () => {}, { passive: true });
 
   // 시스템 테마 변경 감지
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if (state.theme === "auto") {
       applyTheme("auto");
     }
@@ -160,15 +163,28 @@ function applyIdentity(role) {
   const label = document.getElementById("identityLabel");
   const partnerName = document.getElementById("partnerName");
   const partnerAvatar = document.querySelector(".partner-avatar i");
+  const homeTitle = document.getElementById("home-title");
 
   if (role === "wife") {
     label.textContent = "🌸 아내";
     partnerName.textContent = "남편 상태";
     partnerAvatar.className = "ti ti-user-heart";
+    if (homeTitle) homeTitle.innerHTML = "남편에게 당신의<br />마음을 전해볼까요?";
   } else {
     label.textContent = "🙋‍♂️ 남편";
     partnerName.textContent = "아내 상태";
     partnerAvatar.className = "ti ti-user-heart";
+    if (homeTitle) homeTitle.innerHTML = "아내에게 당신의<br />온기를 전해볼까요?";
+  }
+  
+  // 역할 변경 시 상대방 기분 다시 로드
+  if (state.db) {
+    const partner = role === "wife" ? "husband" : "wife";
+    const moodRef = ref(state.db, `sync_mood/${partner}`);
+    onValue(moodRef, (snap) => {
+      const mood = snap.val();
+      if (mood) updatePartnerMoodUI(mood);
+    });
   }
 }
 
@@ -231,6 +247,20 @@ function toggleTheme() {
 function initRealtimeSync() {
   if (!state.db) return;
 
+  // 온라인 상태 업데이트
+  const presenceRef = ref(state.db, `presence/${state.identity}`);
+  set(presenceRef, true);
+  onDisconnect(presenceRef).remove();
+
+  // 상대방 온라인 상태 감시
+  const partner = state.identity === "wife" ? "husband" : "wife";
+  const partnerPresenceRef = ref(state.db, `presence/${partner}`);
+  onValue(partnerPresenceRef, (snap) => {
+    const isOnline = snap.val();
+    const avatar = document.querySelector(".partner-avatar");
+    if (avatar) avatar.classList.toggle("pulse", !!isOnline);
+  });
+
   // 카드 동기화
   const cardsRef = ref(state.db, "sync_comfort_cards");
   onValue(cardsRef, (snap) => {
@@ -247,7 +277,6 @@ function initRealtimeSync() {
   onValue(signalRef, (snap) => {
     const val = snap.val();
     if (val && val.status === "trigger") {
-      // 본인이 보낸 신호가 아닌 경우에만 알림 (시간차 체크)
       if (Date.now() - val.time < 5000) {
         openSignalOverlay();
         playNotificationSound();
@@ -255,6 +284,59 @@ function initRealtimeSync() {
       }
     }
   });
+
+  // 상대방 기분 감시
+  const moodRef = ref(state.db, `sync_mood/${partner}`);
+  onValue(moodRef, (snap) => {
+    const mood = snap.val();
+    if (mood) {
+      updatePartnerMoodUI(mood);
+    }
+  });
+}
+
+// ─── Mood Management ───
+const MOOD_MAP = {
+  fine: "😊",
+  tired: "😴",
+  sad: "😢",
+  busy: "🔥",
+  love: "💖"
+};
+
+function updateMyMood(mood) {
+  state.myMood = mood;
+  localStorage.setItem("app_user_mood", mood);
+  applyMoodUI(mood);
+
+  if (state.db) {
+    const moodRef = ref(state.db, `sync_mood/${state.identity}`);
+    set(moodRef, mood);
+  }
+}
+
+function applyMoodUI(mood) {
+  const chips = document.querySelectorAll(".mood-chip");
+  chips.forEach(chip => {
+    chip.classList.toggle("active", chip.dataset.mood === mood);
+  });
+}
+
+function updatePartnerMoodUI(mood) {
+  const badge = document.getElementById("partnerMoodBadge");
+  const desc = document.getElementById("partnerStatusDesc");
+  if (!badge || !desc) return;
+
+  badge.textContent = MOOD_MAP[mood] || "✨";
+  
+  const moodDescMap = {
+    fine: "오늘 기분이 괜찮아 보여요",
+    tired: "지금 조금 지쳐있나 봐요",
+    sad: "마음이 조금 울적한 것 같아요",
+    busy: "지금 아주 바쁜 상태예요",
+    love: "당신을 아주 많이 사랑한대요"
+  };
+  desc.textContent = moodDescMap[mood] || "함께 마음을 나눠보세요";
 }
 
 function openSignalOverlay() {
@@ -654,21 +736,8 @@ function sendHeart() {
 }
 
 // ─── UI Helpers ───
-function openModal(id, content = null) {
-  const modal = document.getElementById(id);
-  if (!modal) return;
-  
-  if (content) {
-    if (content.title) {
-      const titleEl = document.getElementById("modalTitle");
-      if (titleEl) titleEl.textContent = content.title;
-    }
-    if (content.body) {
-      const bodyEl = document.getElementById("modalBody");
-      if (bodyEl) bodyEl.textContent = content.body;
-    }
-  }
-  modal.classList.add("active");
+function closeHeart() {
+  // Reserved for heart animation close if needed
 }
 
 function closeModal() {

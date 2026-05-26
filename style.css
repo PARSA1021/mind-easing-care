@@ -128,7 +128,7 @@ html, body {
   position: relative;
   max-width: 500px;
   margin: 0 auto;
-  background: var(--bg-app);
+  background: radial-gradient(circle at top right, var(--primary-soft) 0%, var(--bg-app) 40%);
 }
 
 /* ─── Header ─── */
@@ -311,6 +311,72 @@ html, body {
   justify-content: center;
   font-size: 24px;
   will-change: box-shadow;
+  position: relative;
+}
+
+.partner-mood-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  background: var(--bg-card);
+  border: 2px solid var(--primary-soft);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Mood Selector ─── */
+.mood-selector-zone {
+  margin-bottom: 32px;
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-hint);
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+.mood-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.mood-chips::-webkit-scrollbar { display: none; }
+
+.mood-chip {
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s var(--ease-standard);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mood-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mood-chip:active {
+  transform: scale(0.95);
 }
 
 .partner-avatar.pulse {
@@ -367,17 +433,43 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  box-shadow: 0 20px 40px rgba(255, 107, 139, 0.3);
+  box-shadow: 0 20px 40px rgba(255, 107, 139, 0.3), inset 0 -8px 12px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   z-index: 2;
-  transition: transform 0.3s var(--spring), box-shadow 0.3s var(--ease-standard);
+  transition: all 0.4s var(--spring);
   will-change: transform, box-shadow;
+  position: relative;
+  overflow: hidden;
+}
+
+.summon-main-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
 }
 
 .summon-main-btn:active {
   transform: scale(0.92);
   box-shadow: 0 10px 20px rgba(255, 107, 139, 0.2);
 }
+
+.summon-main-btn i {
+  font-size: 44px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  animation: heartBeat 2s infinite;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  10% { transform: scale(1.15); }
+  20% { transform: scale(1); }
+  30% { transform: scale(1.15); }
+  40% { transform: scale(1); }
+}
+
+.summon-main-btn span { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
 
 /* ─── Heart Burst Effect ─── */
 .heart-particle {
@@ -393,9 +485,6 @@ html, body {
   0% { transform: translate(0, 0) scale(1); opacity: 1; }
   100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
 }
-
-.summon-main-btn i { font-size: 40px; }
-.summon-main-btn span { font-size: 16px; font-weight: 700; }
 
 .ripple-effect {
   position: absolute;
