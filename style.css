@@ -119,6 +119,114 @@ html, body {
   position: fixed; /* Prevent rubber-banding on body */
 }
 
+/* ─── Role Selection Overlay ─── */
+.role-selection-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-app);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transition: opacity 0.5s ease, transform 0.5s var(--spring);
+}
+
+.role-selection-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.1);
+}
+
+.role-selection-content {
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+}
+
+.role-logo {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 32px;
+  box-shadow: var(--shadow-md);
+}
+
+.role-selection-content h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.role-selection-content p {
+  font-size: 15px;
+  color: var(--text-sub);
+  margin-bottom: 40px;
+}
+
+.role-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.role-opt-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s var(--spring);
+  box-shadow: var(--shadow-sm);
+}
+
+.role-opt-btn:active {
+  transform: scale(0.95);
+}
+
+.role-opt-btn .role-icon {
+  font-size: 32px;
+}
+
+.role-opt-btn span {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.role-opt-btn.wife:hover, .role-opt-btn.wife.selected {
+  background: rgba(255, 107, 139, 0.1);
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(255, 107, 139, 0.15);
+}
+
+.role-opt-btn.husband:hover, .role-opt-btn.husband.selected {
+  background: rgba(77, 150, 255, 0.1);
+  border-color: #4D96FF;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(77, 150, 255, 0.15);
+}
+
+.role-footer-tip {
+  font-size: 13px;
+  color: var(--text-hint) !important;
+  margin-top: 24px;
+}
+
 /* ─── App Container ─── */
 .app-container {
   width: 100%;
@@ -156,6 +264,68 @@ html, body {
   z-index: 0;
   pointer-events: none;
   opacity: 0.4;
+}
+
+/* ─── User Identity Box ─── */
+.user-identity-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+  cursor: pointer;
+  transition: all 0.3s var(--spring);
+  box-shadow: var(--shadow-sm);
+}
+
+.user-identity-box:active {
+  transform: scale(0.95);
+}
+
+.user-identity-box.role-wife {
+  background: rgba(255, 107, 139, 0.1);
+  border-color: rgba(255, 107, 139, 0.2);
+}
+
+.user-identity-box.role-husband {
+  background: rgba(77, 150, 255, 0.1);
+  border-color: rgba(77, 150, 255, 0.2);
+}
+
+.user-identity-box.role-husband i {
+  color: #4D96FF;
+}
+
+.user-role-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.user-identity-box i {
+  font-size: 16px;
+  color: var(--primary);
+}
+
+/* ─── Signal Custom Message Box ─── */
+.signal-custom-msg-box {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  margin: 20px 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 80%;
+}
+
+#signalCustomMessageText {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  line-height: 1.5;
+  word-break: break-all;
 }
 
 /* ─── Header ─── */

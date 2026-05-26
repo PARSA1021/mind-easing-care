@@ -37,15 +37,20 @@ const state = {
 // ─── Initialization ───
 document.addEventListener("DOMContentLoaded", () => {
   initFirebase();
-  applyIdentity(state.identity);
   applyTheme(state.theme);
   applyMoodUI(state.myMood);
-  initRealtimeSync();
   setupEventListeners();
   checkFirstVisit();
   updateTabIndicator(0);
   registerServiceWorker();
   renderCardScreen();
+
+  // 앱 시작 시 역할 선택 모달 표시 (기존 identity가 있어도 명확한 확인을 위해)
+  const overlay = document.getElementById("roleSelectionOverlay");
+  if (overlay) {
+    // 이미 선택된 정보가 있다면 UI에 미리 반영
+    applyIdentity(state.identity);
+  }
 });
 
 // 전역 함수로 등록 (HTML onclick 대응)
@@ -69,6 +74,9 @@ window.updateCharCount = updateCharCount;
 window.toggleLikeCard = toggleLikeCard;
 window.playNotificationSound = playNotificationSound;
 window.toggleCardView = toggleCardView;
+window.closeSignalMessageModal = closeSignalMessageModal;
+window.confirmSendSignal = confirmSendSignal;
+window.selectRole = selectRole;
 
 function initAudio() {
   if (!state.audioCtx) {
@@ -202,6 +210,20 @@ function openHelpModal() {
 }
 
 // ─── Identity Management ───
+function selectRole(role) {
+  const overlay = document.getElementById("roleSelectionOverlay");
+  
+  applyIdentity(role);
+  
+  if (overlay) {
+    overlay.classList.add("hidden");
+    // 선택 완료 후 초기 동기화 시작
+    initRealtimeSync();
+  }
+  
+  showToast(`[${role === "wife" ? "아내" : "남편"}] 역할로 시작합니다. ✨`);
+}
+
 function applyIdentity(role) {
   state.identity = role;
   localStorage.setItem("app_user_identity", role);
@@ -210,18 +232,27 @@ function applyIdentity(role) {
   const partnerName = document.getElementById("partnerName");
   const partnerAvatar = document.querySelector(".partner-avatar i");
   const homeTitle = document.getElementById("home-title");
+  const identityBox = document.getElementById("userIdentityBox");
 
   if (role === "wife") {
     label.textContent = "🌸 아내";
     partnerName.textContent = "사랑하는 남편";
     partnerAvatar.className = "ti ti-user-heart";
     if (homeTitle) homeTitle.innerHTML = "남편에게 당신의<br />다정한 마음을 전해볼까요?";
+    if (identityBox) identityBox.className = "user-identity-box role-wife";
   } else {
     label.textContent = "🙋‍♂️ 남편";
     partnerName.textContent = "사랑하는 아내";
     partnerAvatar.className = "ti ti-user-heart";
     if (homeTitle) homeTitle.innerHTML = "아내에게 당신의<br />따뜻한 온기를 전해볼까요?";
+    if (identityBox) identityBox.className = "user-identity-box role-husband";
   }
+
+  // 역할 선택 오버레이의 버튼 상태 업데이트
+  const roleBtns = document.querySelectorAll(".role-opt-btn");
+  roleBtns.forEach(btn => {
+    btn.classList.toggle("selected", btn.classList.contains(role));
+  });
   
   // 역할 변경 시 상대방 기분 다시 로드
   if (state.db) {
@@ -243,8 +274,14 @@ function switchIdentity() {
   
   // 역할 변경 시 Firebase 연결 재설정
   if (state.db) {
-    const signalRef = ref(state.db, `sync_signal/${oldRole}`);
-    off(signalRef);
+    const oldPartner = oldRole === "wife" ? "husband" : "wife";
+    // 기존 모든 리스너 제거하여 중복 방지
+    off(ref(state.db, `sync_signal/${oldRole}`));
+    off(ref(state.db, `sync_mood/${oldPartner}`));
+    off(ref(state.db, `presence/${oldPartner}`));
+    off(ref(state.db, `last_active/${oldPartner}`));
+    off(ref(state.db, "sync_comfort_cards"));
+    
     initRealtimeSync();
   }
 }
@@ -376,7 +413,7 @@ function initRealtimeSync() {
     const val = snap.val();
     if (val && val.status === "trigger") {
       if (Date.now() - val.time < 5000) {
-        openSignalOverlay();
+        openSignalOverlay(val.message);
         playNotificationSound('signal');
         if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
         for(let i=0; i<10; i++) setTimeout(() => createGlobalParticle('✨'), i * 150);
@@ -454,12 +491,26 @@ function updatePartnerMoodUI(mood) {
   desc.textContent = moodDescMap[mood] || "함께 따뜻한 마음을 나눠보세요";
 }
 
-function openSignalOverlay() {
+function openSignalOverlay(message = "") {
   const overlay = document.getElementById("signalArrivalOverlay");
   const senderName = document.getElementById("signalSenderName");
+  const defaultText = document.getElementById("signalDefaultText");
+  const customContainer = document.getElementById("signalCustomMessageContainer");
+  const customText = document.getElementById("signalCustomMessageText");
+
   if (!overlay || !senderName) return;
 
   senderName.textContent = state.identity === "wife" ? "남편의 신호" : "아내의 신호";
+  
+  if (message) {
+    if (defaultText) defaultText.style.display = "none";
+    if (customContainer) customContainer.style.display = "block";
+    if (customText) customText.textContent = message;
+  } else {
+    if (defaultText) defaultText.style.display = "block";
+    if (customContainer) customContainer.style.display = "none";
+  }
+
   overlay.classList.add("active");
   
   // 시각적 강조: 화면 플래시 효과
@@ -488,27 +539,53 @@ function closeSignalOverlay() {
 }
 
 function sendSignalToPartner() {
+  const modal = document.getElementById("signalMessageModal");
+  const input = document.getElementById("signal-custom-input");
+  if (modal) {
+    if (input) input.value = "";
+    modal.classList.add("active");
+    if (input) setTimeout(() => input.focus(), 300);
+  }
+}
+
+function closeSignalMessageModal() {
+  const modal = document.getElementById("signalMessageModal");
+  if (modal) modal.classList.remove("active");
+}
+
+function confirmSendSignal() {
   const partner = state.identity === "wife" ? "husband" : "wife";
   const btn = document.querySelector(".summon-main-btn");
-  
+  const modalBtn = document.querySelector("#signalMessageModal .primary-btn");
+  const input = document.getElementById("signal-custom-input");
+  const customMsg = input ? input.value.trim() : "";
+
   if (btn.disabled) return;
 
   // UI Feedback: Heart Burst
   createHeartBurst(btn);
+  closeSignalMessageModal();
 
   if (state.db) {
     btn.disabled = true;
+    if (modalBtn) modalBtn.disabled = true;
+
     const partnerSignalRef = ref(state.db, `sync_signal/${partner}`);
     set(partnerSignalRef, {
       status: "trigger",
       time: Date.now(),
+      message: customMsg
     }).then(() => {
-      showToast("배우자에게 따뜻한 위로 신호를 보냈어요. ✨");
-      setTimeout(() => { btn.disabled = false; }, 3000); // 3초 쿨다운
+      showToast(customMsg ? "따뜻한 메시지와 함께 신호를 보냈어요. ✨" : "배우자에게 따뜻한 위로 신호를 보냈어요. ✨");
+      setTimeout(() => { 
+        btn.disabled = false; 
+        if (modalBtn) modalBtn.disabled = false;
+      }, 3000); // 3초 쿨다운
     }).catch((err) => {
       console.error("Signal send failed:", err);
       showToast("신호 전송에 실패했어요. 다시 시도해볼까요?");
       btn.disabled = false;
+      if (modalBtn) modalBtn.disabled = false;
     });
   } else {
     showToast("지금은 연결 상태가 조금 불안정해요. 🛰️");
