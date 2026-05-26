@@ -77,6 +77,7 @@ window.toggleCardView = toggleCardView;
 window.closeSignalMessageModal = closeSignalMessageModal;
 window.confirmSendSignal = confirmSendSignal;
 window.selectRole = selectRole;
+window.updateSignalCharCount = updateSignalCharCount;
 
 function initAudio() {
   if (!state.audioCtx) {
@@ -113,7 +114,7 @@ function playNotificationSound(type = 'default') {
   osc.stop(ctx.currentTime + (type === 'signal' ? 0.8 : 0.4));
 }
 
-function showNotificationBanner(title, body, iconClass = 'ti ti-bell-bolt') {
+function showNotificationBanner(title, body, iconClass = 'ti ti-bell-bolt', targetTab = null) {
   const banner = document.getElementById("notificationBanner");
   const titleEl = document.getElementById("notifBannerTitle");
   const bodyEl = document.getElementById("notifBannerBody");
@@ -124,6 +125,14 @@ function showNotificationBanner(title, body, iconClass = 'ti ti-bell-bolt') {
   titleEl.textContent = title;
   bodyEl.textContent = body;
   iconEl.className = iconClass;
+
+  // 배너 클릭 시 동작 설정
+  banner.onclick = () => {
+    if (targetTab) {
+      navigateTab(targetTab);
+    }
+    banner.classList.remove("active");
+  };
 
   banner.classList.add("active");
   
@@ -385,7 +394,7 @@ function initRealtimeSync() {
         const lastCard = newPool[newPool.length - 1];
         if (lastCard.author !== state.identity) {
           const authorName = lastCard.author === "wife" ? "아내" : "남편";
-          showNotificationBanner("새로운 위로 도착", `${authorName}의 따뜻한 마음이 도착했어요.`, "ti ti-message-heart");
+          showNotificationBanner("새로운 위로 도착", `${authorName}의 따뜻한 마음이 도착했어요.`, "ti ti-message-heart", "cards");
           playNotificationSound('message');
           triggerTabNotifyAnim(3);
         }
@@ -399,7 +408,7 @@ function initRealtimeSync() {
             // 내가 쓴 카드에 좋아요가 눌렸을 때만 알림
             if (newCard.author === state.identity) {
               const partnerName = state.identity === "wife" ? "남편" : "아내";
-              showNotificationBanner("마음 전달 완료", `${partnerName}이 당신의 위로에 공감했어요.`, "ti ti-heart-filled");
+              showNotificationBanner("마음 전달 완료", `${partnerName}이 당신의 위로에 공감했어요.`, "ti ti-heart-filled", "cards");
               playNotificationSound('like');
               for(let i=0; i<5; i++) setTimeout(() => createGlobalParticle('❤️'), i * 100);
             }
@@ -437,7 +446,7 @@ function initRealtimeSync() {
     if (mood) {
       if (lastMood && lastMood !== mood) {
         const partnerName = state.identity === "wife" ? "남편" : "아내";
-        showNotificationBanner("기분 변화 감지", `${partnerName}의 기분이 [${MOOD_MAP[mood]}] (으)로 바뀌었어요.`, "ti ti-mood-smile");
+        showNotificationBanner("기분 변화 감지", `${partnerName}의 기분이 [${MOOD_MAP[mood]}] (으)로 바뀌었어요.`, "ti ti-mood-smile", "summon");
         playNotificationSound('default');
       }
       updatePartnerMoodUI(mood);
@@ -917,6 +926,14 @@ function updateCharCount(textarea) {
   if (countEl) {
     const count = textarea.value.length;
     countEl.textContent = `${count} / 100`;
+  }
+}
+
+function updateSignalCharCount(textarea) {
+  const countEl = document.getElementById("signal-char-count");
+  if (countEl) {
+    const count = textarea.value.length;
+    countEl.textContent = `${count} / 50`;
   }
 }
 

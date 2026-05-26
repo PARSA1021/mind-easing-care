@@ -312,20 +312,28 @@ html, body {
 
 /* ─── Signal Custom Message Box ─── */
 .signal-custom-msg-box {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 16px;
-  border-radius: var(--radius-md);
-  margin: 20px 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  max-width: 80%;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  margin: 24px 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: slideUpFade 0.6s var(--spring) both;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 #signalCustomMessageText {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: white;
-  line-height: 1.5;
+  line-height: 1.6;
   word-break: break-all;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* ─── Header ─── */
@@ -1403,6 +1411,11 @@ button:active {
   z-index: 5000;
   transform: translateY(-150%);
   transition: transform 0.6s var(--spring);
+  cursor: pointer;
+}
+
+.notification-banner:active {
+  transform: scale(0.98);
 }
 
 .notification-banner.active {

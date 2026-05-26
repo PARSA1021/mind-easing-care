@@ -277,7 +277,11 @@
             id="signal-custom-input" 
             placeholder="지금 어떤 마음인지 짧게 남겨주세요 (비워두면 기본 신호만 가요)"
             maxlength="50"
+            oninput="updateSignalCharCount(this)"
           ></textarea>
+          <div class="input-footer">
+            <span id="signal-char-count">0 / 50</span>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="primary-btn full" onclick="confirmSendSignal()">
