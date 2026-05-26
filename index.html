@@ -41,11 +41,13 @@
           <div class="role-options">
             <button class="role-opt-btn wife" onclick="selectRole('wife')">
               <div class="role-icon">🌸</div>
-              <span>아내</span>
+              <span>저는 <strong>아내</strong>예요</span>
+              <small>남편을 챙겨줄게요</small>
             </button>
             <button class="role-opt-btn husband" onclick="selectRole('husband')">
               <div class="role-icon">🙋‍♂️</div>
-              <span>남편</span>
+              <span>저는 <strong>남편</strong>이에요</span>
+              <small>아내를 챙겨줄게요</small>
             </button>
           </div>
           
@@ -269,13 +271,13 @@
     <div id="signalMessageModal" class="modal-overlay bottom-sheet" role="dialog" aria-modal="true">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>위로 신호와 함께 보낼 말</h3>
+          <h3 id="signalModalTitle">배우자에게 보낼 말</h3>
           <button class="close-icon-btn" onclick="closeSignalMessageModal()"><i class="ti ti-x"></i></button>
         </div>
         <div class="modal-body">
           <textarea 
             id="signal-custom-input" 
-            placeholder="지금 어떤 마음인지 짧게 남겨주세요 (비워두면 기본 신호만 가요)"
+            placeholder="지금 어떤 마음인지 짧게 남겨주세요..."
             maxlength="50"
             oninput="updateSignalCharCount(this)"
           ></textarea>
@@ -284,7 +286,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="primary-btn full" onclick="confirmSendSignal()">
+          <button class="primary-btn full" onclick="confirmSendSignal()" id="signalConfirmBtn">
             <i class="ti ti-flame"></i> 신호 보내기
           </button>
         </div>

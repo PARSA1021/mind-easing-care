@@ -203,8 +203,23 @@ html, body {
 
 .role-opt-btn span {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-main);
+}
+
+.role-opt-btn span strong {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.role-opt-btn.husband span strong {
+  color: #4D96FF;
+}
+
+.role-opt-btn small {
+  font-size: 12px;
+  color: var(--text-hint);
+  font-weight: 500;
 }
 
 .role-opt-btn.wife:hover, .role-opt-btn.wife.selected {

@@ -249,6 +249,8 @@ function applyIdentity(role) {
   const partnerAvatar = document.querySelector(".partner-avatar i");
   const homeTitle = document.getElementById("home-title");
   const identityBox = document.getElementById("userIdentityBox");
+  const signalModalTitle = document.getElementById("signalModalTitle");
+  const signalConfirmBtn = document.getElementById("signalConfirmBtn");
 
   if (role === "wife") {
     label.textContent = "🌸 아내";
@@ -256,12 +258,16 @@ function applyIdentity(role) {
     partnerAvatar.className = "ti ti-user-heart";
     if (homeTitle) homeTitle.innerHTML = "남편에게 당신의<br />다정한 마음을 전해볼까요?";
     if (identityBox) identityBox.className = "user-identity-box role-wife";
+    if (signalModalTitle) signalModalTitle.textContent = "남편에게 보낼 말";
+    if (signalConfirmBtn) signalConfirmBtn.innerHTML = '<i class="ti ti-flame"></i> 남편에게 신호 보내기';
   } else {
     label.textContent = "🙋‍♂️ 남편";
     partnerName.textContent = "사랑하는 아내";
     partnerAvatar.className = "ti ti-user-heart";
     if (homeTitle) homeTitle.innerHTML = "아내에게 당신의<br />따뜻한 온기를 전해볼까요?";
     if (identityBox) identityBox.className = "user-identity-box role-husband";
+    if (signalModalTitle) signalModalTitle.textContent = "아내에게 보낼 말";
+    if (signalConfirmBtn) signalConfirmBtn.innerHTML = '<i class="ti ti-flame"></i> 아내에게 신호 보내기';
   }
 
   // 역할 선택 오버레이의 버튼 상태 업데이트
