@@ -216,9 +216,16 @@ function selectRole(role) {
   applyIdentity(role);
   
   if (overlay) {
-    overlay.classList.add("hidden");
-    // 선택 완료 후 초기 동기화 시작
-    initRealtimeSync();
+    // 부드러운 페이드 아웃 효과
+    overlay.style.transition = "opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+    overlay.style.opacity = "0";
+    overlay.style.transform = "scale(1.05)";
+    
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+      // 선택 완료 후 초기 동기화 시작
+      initRealtimeSync();
+    }, 600);
   }
   
   showToast(`[${role === "wife" ? "아내" : "남편"}] 역할로 시작합니다. ✨`);
@@ -619,13 +626,28 @@ function navigateTab(tabId) {
   const tabs = document.querySelectorAll(".tab-item");
   const targetIdx = ["summon", "breath", "dump", "cards"].indexOf(tabId);
 
+  // 현재 활성 탭 인덱스 찾기
+  let currentIdx = -1;
+  tabs.forEach((tab, idx) => {
+    if (tab.classList.contains("active")) currentIdx = idx;
+  });
+
+  if (currentIdx === targetIdx) return;
+
+  // UI 상태 업데이트 (Active Class 전환)
   screens.forEach((s) => s.classList.remove("active"));
   tabs.forEach((t) => {
     t.classList.remove("active");
     t.setAttribute("aria-selected", "false");
   });
 
-  document.getElementById("scr-" + tabId).classList.add("active");
+  const targetScreen = document.getElementById("scr-" + tabId);
+  if (targetScreen) {
+    targetScreen.classList.add("active");
+    // 화면 전환 시 스크롤 상단으로 이동
+    targetScreen.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   tabs[targetIdx].classList.add("active");
   tabs[targetIdx].setAttribute("aria-selected", "true");
 
@@ -639,6 +661,12 @@ function navigateTab(tabId) {
   if (tabId !== "breath" && state.isMeditating) {
     stopMeditation();
   }
+
+  // 활동 기록 업데이트
+  updateActivityTimestamp();
+
+  // Haptic Feedback (Vibrate on tab change)
+  if ("vibrate" in navigator) navigator.vibrate(10);
 }
 
 function updateTabIndicator(idx) {
@@ -668,8 +696,15 @@ function startMeditation() {
   function breathCycle() {
     if (!state.isMeditating) return;
     
-    // Inhale
-    if (desc) desc.textContent = "숨을 천천히 깊게 들이마셔요...";
+    // Inhale (4s)
+    if (desc) {
+      desc.style.opacity = "0";
+      setTimeout(() => {
+        desc.textContent = "숨을 천천히 깊게 들이마셔요...";
+        desc.style.opacity = "1";
+      }, 300);
+    }
+    
     if (circle) {
       circle.style.transform = "scale(1.5)";
       circle.style.opacity = "0.8";
@@ -678,8 +713,15 @@ function startMeditation() {
     state.meditationTimer = setTimeout(() => {
       if (!state.isMeditating) return;
       
-      // Exhale
-      if (desc) desc.textContent = "이제 편안하게 내뱉으세요...";
+      // Exhale (4s)
+      if (desc) {
+        desc.style.opacity = "0";
+        setTimeout(() => {
+          desc.textContent = "이제 편안하게 내뱉으세요...";
+          desc.style.opacity = "1";
+        }, 300);
+      }
+      
       if (circle) {
         circle.style.transform = "scale(1.0)";
         circle.style.opacity = "0.3";

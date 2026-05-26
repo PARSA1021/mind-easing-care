@@ -510,32 +510,48 @@ html, body {
   transform: scale(0.95);
 }
 
-/* ─── Main Viewport ─── */
-.main-viewport {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-
+/* ─── Screen Transitions ─── */
 .screen {
   position: absolute;
   inset: 0;
-  padding: 24px 20px;
+  padding: 24px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(20px);
-  transition: opacity 0.4s var(--ease-standard), transform 0.4s var(--spring);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  will-change: opacity, transform;
+  transform: translateY(10px);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+  z-index: 1;
 }
 
 .screen.active {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+  z-index: 2;
+}
+
+/* ─── Micro Interactions ─── */
+button, .mood-chip, .user-identity-box, .tab-item {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+button:active {
+  transform: scale(0.96);
+  transition: transform 0.1s var(--ease-out);
+}
+
+.primary-btn, .glass-btn, .summon-main-btn {
+  transition: all 0.3s var(--spring);
+}
+
+/* ─── Main Content ─── */
+.main-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 
 /* ─── Status Card ─── */
@@ -768,6 +784,7 @@ html, body {
   100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
 }
 
+/* ─── Enhanced Ripples ─── */
 .ripple-effect {
   position: absolute;
   width: 170px;
@@ -776,13 +793,14 @@ html, body {
   border: 1px solid var(--primary);
   opacity: 0;
   pointer-events: none;
-  animation: ripple 4s infinite;
+  animation: rippleEnhanced 4s infinite cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform, opacity;
 }
 
-@keyframes ripple {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(2.4); opacity: 0; }
+@keyframes rippleEnhanced {
+  0% { transform: scale(1); opacity: 0.6; border-width: 2px; }
+  50% { opacity: 0.2; }
+  100% { transform: scale(2.8); opacity: 0; border-width: 0.5px; }
 }
 
 /* ─── Breath Section ─── */
@@ -796,7 +814,12 @@ html, body {
 
 .breath-guide-text { text-align: center; }
 .breath-guide-text h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-.breath-guide-text p { color: var(--text-sub); }
+.breath-guide-text p {
+  font-size: 15px;
+  color: var(--text-sub);
+  line-height: 1.6;
+  transition: opacity 0.3s ease;
+}
 
 .visual-breath-area {
   position: relative;
@@ -807,12 +830,28 @@ html, body {
   justify-content: center;
 }
 
+/* ─── Breathing Animation Refinement ─── */
 .breath-circle {
-  width: 120px;
-  height: 120px;
-  background: var(--primary-soft);
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, var(--primary) 0%, var(--primary-soft) 100%);
   border-radius: 50%;
-  transition: width 4s var(--ease-standard), height 4s var(--ease-standard);
+  opacity: 0.3;
+  transition: transform 4s cubic-bezier(0.45, 0.05, 0.55, 0.95), opacity 4s ease;
+  will-change: transform, opacity;
+}
+
+/* ─── Skeleton Loading States ─── */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-card) 25%, var(--primary-soft) 50%, var(--bg-card) 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes skeletonLoading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .breath-circle.inhale { width: 240px; height: 240px; background: var(--primary); opacity: 0.6; }
@@ -982,17 +1021,20 @@ textarea {
 
 .icon-btn.heart { color: #FF4757; background: var(--primary-soft); border-color: var(--border-light); }
 
-/* ─── Tab Bar ─── */
+/* ─── Tab Bar Refinement ─── */
 .tab-bar {
-  height: calc(var(--tab-bar-h) + var(--safe-bottom));
-  padding-bottom: var(--safe-bottom);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--tab-bar-h);
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   display: flex;
-  border-top: 0.5px solid var(--border-light);
-  position: relative;
-  z-index: 100;
+  padding-bottom: var(--safe-bottom);
+  border-top: 1px solid var(--border-glass);
+  z-index: 1000;
 }
 
 .tab-item {
