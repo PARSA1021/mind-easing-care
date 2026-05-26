@@ -514,7 +514,7 @@ html, body {
 .screen {
   position: absolute;
   inset: 0;
-  padding: 24px;
+  padding: 24px 24px calc(var(--tab-bar-h) + 24px + var(--safe-bottom)); /* 하단 탭바 높이만큼 여백 추가 */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -523,6 +523,7 @@ html, body {
   transform: translateY(10px);
   transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
   z-index: 1;
+  -webkit-overflow-scrolling: touch;
 }
 
 .screen.active {
@@ -913,9 +914,23 @@ button:active {
 }
 
 /* ─── Dump Section ─── */
-.dump-header { margin-bottom: 24px; }
-.dump-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-.dump-header p { color: var(--text-sub); }
+.dump-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.dump-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.dump-header p {
+  font-size: 15px;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
 
 .dump-editor {
   flex: 1;
@@ -924,19 +939,26 @@ button:active {
   gap: 16px;
 }
 
-textarea {
-  flex: 1;
+.dump-editor textarea {
   width: 100%;
-  padding: 20px;
+  height: 240px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  padding: 24px;
   font-size: 17px;
   line-height: 1.6;
   color: var(--text-main);
   resize: none;
-  outline: none;
+  margin-bottom: 24px;
   box-shadow: var(--shadow-inner);
+  transition: border-color 0.3s var(--ease-standard), box-shadow 0.3s var(--ease-standard);
+}
+
+.dump-editor textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+  outline: none;
 }
 
 .primary-btn {
@@ -1027,13 +1049,14 @@ textarea {
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--tab-bar-h);
+  height: calc(var(--tab-bar-h) + var(--safe-bottom));
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
   display: flex;
   padding-bottom: var(--safe-bottom);
   border-top: 1px solid var(--border-glass);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
   z-index: 1000;
 }
 
@@ -1044,17 +1067,32 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  border: none;
   background: none;
+  border: none;
   color: var(--text-hint);
-  transition: color 0.3s var(--ease-standard);
+  transition: all 0.3s var(--ease-standard);
   position: relative;
+  padding-top: 8px;
 }
 
-.tab-item.active { color: var(--primary); }
+.tab-item.active {
+  color: var(--primary);
+}
 
-.tab-item i { font-size: 24px; }
-.tab-item span { font-size: 11px; font-weight: 600; }
+.tab-item.active i {
+  transform: translateY(-2px);
+}
+
+.tab-item i { 
+  font-size: 24px; 
+  transition: transform 0.3s var(--spring);
+}
+
+.tab-item span { 
+  font-size: 11px; 
+  font-weight: 700; 
+  letter-spacing: -0.2px;
+}
 
 .tab-badge {
   position: absolute;
