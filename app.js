@@ -32,6 +32,9 @@ const state = {
   audioCtx: null,
   currentCardId: null,
   isListView: false,
+  activeSounds: {},
+  isHugging: false,
+  partnerHugging: false,
 };
 
 // ─── Initialization ───
@@ -45,10 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
   registerServiceWorker();
   renderCardScreen();
 
-  // 앱 시작 시 역할 선택 모달 표시 (기존 identity가 있어도 명확한 확인을 위해)
+  // 앱 시작 시 역할 선택 모달 표시
   const overlay = document.getElementById("roleSelectionOverlay");
   if (overlay) {
-    // 이미 선택된 정보가 있다면 UI에 미리 반영
     applyIdentity(state.identity);
   }
 });
@@ -64,6 +66,7 @@ window.executeTextDumping = executeTextDumping;
 window.drawNextComfortCard = drawNextComfortCard;
 window.addComfortMessage = addComfortMessage;
 window.sendHeart = sendHeart;
+window.openHelpIndicator = openHelpModal; // fix typo if any
 window.openHelpModal = openHelpModal;
 window.closeHelpModal = closeHelpModal;
 window.closeModal = closeModal;
@@ -78,6 +81,9 @@ window.closeSignalMessageModal = closeSignalMessageModal;
 window.confirmSendSignal = confirmSendSignal;
 window.selectRole = selectRole;
 window.updateSignalCharCount = updateSignalCharCount;
+window.toggleSound = toggleSound;
+window.startHug = startHug;
+window.stopHug = stopHug;
 
 function initAudio() {
   if (!state.audioCtx) {
@@ -384,7 +390,14 @@ function initRealtimeSync() {
     updateLastActiveUI(timestamp);
   });
 
-  // 4. 카드 동기화
+  // 4. 온기(허그) 상태 감시
+  const partnerHugRef = ref(state.db, `hugging/${partner}`);
+  onValue(partnerHugRef, (snap) => {
+    state.partnerHugging = !!snap.val();
+    updateHugUI();
+  });
+
+  // 5. 카드 동기화
   const cardsRef = ref(state.db, "sync_comfort_cards");
   let isInitialLoad = true;
   onValue(cardsRef, (snap) => {
@@ -639,7 +652,7 @@ function createHeartBurst(parent) {
 function navigateTab(tabId) {
   const screens = document.querySelectorAll(".screen");
   const tabs = document.querySelectorAll(".tab-item");
-  const targetIdx = ["summon", "breath", "dump", "cards"].indexOf(tabId);
+  const targetIdx = ["summon", "breath", "warmth", "dump", "cards"].indexOf(tabId);
 
   // 현재 활성 탭 인덱스 찾기
   let currentIdx = -1;
@@ -1022,6 +1035,98 @@ function showToast(msg) {
   // 이전 타이머 제거 (연속 클릭 시)
   if (t.timeout) clearTimeout(t.timeout);
   t.timeout = setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ─── Soundscape Logic ───
+const SOUND_SOURCES = {
+  rain: "https://www.soundjay.com/nature/rain-01.mp3",
+  forest: "https://www.soundjay.com/nature/forest-wind-01.mp3",
+  waves: "https://www.soundjay.com/nature/ocean-waves-1.mp3"
+};
+
+function toggleSound(type) {
+  const btn = event.currentTarget;
+  
+  if (state.activeSounds[type]) {
+    state.activeSounds[type].pause();
+    delete state.activeSounds[type];
+    btn.classList.remove("active");
+    showToast(`${btn.textContent.trim()} 소리를 껐어요.`);
+  } else {
+    const audio = new Audio(SOUND_SOURCES[type]);
+    audio.loop = true;
+    audio.volume = 0.5;
+    audio.play().catch(err => console.error("Audio play failed:", err));
+    state.activeSounds[type] = audio;
+    btn.classList.add("active");
+    showToast(`${btn.textContent.trim()} 소리를 들려드릴게요. ✨`);
+  }
+}
+
+// ─── Warmth (Hug) Logic ───
+function startHug() {
+  state.isHugging = true;
+  const btn = document.getElementById("hugBtn");
+  const bg = document.querySelector(".hug-circle-bg");
+  
+  if (btn) btn.classList.add("hugging");
+  if (bg) bg.style.transform = "scale(1.2)";
+  
+  if (state.db) {
+    const hugRef = ref(state.db, `hugging/${state.identity}`);
+    set(hugRef, true);
+  }
+  
+  updateHugUI();
+}
+
+function stopHug() {
+  state.isHugging = false;
+  const btn = document.getElementById("hugBtn");
+  const bg = document.querySelector(".hug-circle-bg");
+  
+  if (btn) {
+    btn.classList.remove("hugging");
+    btn.classList.remove("shared-warmth");
+  }
+  if (bg) bg.style.transform = "scale(0.8)";
+  
+  if (state.db) {
+    const hugRef = ref(state.db, `hugging/${state.identity}`);
+    set(hugRef, false);
+  }
+  
+  updateHugUI();
+}
+
+function updateHugUI() {
+  const msg = document.getElementById("hugMessage");
+  const btn = document.getElementById("hugBtn");
+  const status = document.getElementById("warmthPartnerStatus");
+  const isOnline = document.querySelector(".partner-avatar").classList.contains("pulse");
+
+  if (!msg || !btn || !status) return;
+
+  if (isOnline) {
+    status.textContent = "상대방이 연결되어 있어요";
+    status.classList.add("online");
+  } else {
+    status.textContent = "상대방을 기다리고 있어요...";
+    status.classList.remove("online");
+  }
+
+  if (state.isHugging && state.partnerHugging) {
+    msg.textContent = "서로의 온기가 연결되었습니다! ❤️";
+    btn.classList.add("shared-warmth");
+    if ("vibrate" in navigator) navigator.vibrate([50, 50]);
+  } else if (state.isHugging) {
+    msg.textContent = "상대방의 온기를 기다리는 중...";
+  } else if (state.partnerHugging) {
+    msg.textContent = "상대방이 당신을 안아주고 싶어해요!";
+    triggerTabNotifyAnim(2); // 온기 탭 알림
+  } else {
+    msg.textContent = "버튼을 길게 눌러보세요";
+  }
 }
 
 // ─── Health & Connectivity Helpers ───

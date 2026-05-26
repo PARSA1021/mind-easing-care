@@ -1154,13 +1154,149 @@ button:active {
   position: absolute;
   top: 0;
   height: 3px;
-  width: 25%;
+  width: 20%; /* 5개 탭이므로 20% */
   background: var(--primary);
   transition: transform 0.3s var(--spring);
   border-radius: 0 0 3px 3px;
 }
 
-/* ─── Comfort Card Enhancements ─── */
+/* ─── Nature Sounds ─── */
+.sound-scape-zone {
+  margin-top: 40px;
+  width: 100%;
+}
+
+.sound-chips {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.sound-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-standard);
+}
+
+.sound-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ─── Warmth Content ─── */
+.warmth-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.warmth-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.warmth-header h2 { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
+.warmth-header p { font-size: 15px; color: var(--text-sub); line-height: 1.6; }
+
+.warmth-visual-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.partner-connection-status {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-hint);
+  padding: 8px 16px;
+  background: var(--primary-soft);
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
+}
+
+.partner-connection-status.online {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.hug-zone {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hug-circle-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  border-radius: 50%;
+  opacity: 0.1;
+  transform: scale(0.8);
+  transition: transform 0.5s var(--spring);
+}
+
+.hug-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: var(--primary);
+  z-index: 2;
+  cursor: pointer;
+  transition: all 0.3s var(--spring);
+}
+
+.hug-btn:active {
+  transform: scale(0.9);
+}
+
+.hug-btn.hugging {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 0 30px var(--primary);
+}
+
+.hug-btn.shared-warmth {
+  animation: warmthVibrate 0.2s infinite;
+}
+
+@keyframes warmthVibrate {
+  0% { transform: scale(0.9) translate(0, 0); }
+  50% { transform: scale(0.91) translate(1px, 1px); }
+  100% { transform: scale(0.9) translate(-1px, -1px); }
+}
+
+.hug-message {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+/* ─── Notification Banner ─── */
 .card-footer {
   width: 100%;
   display: flex;

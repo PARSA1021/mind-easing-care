@@ -139,6 +139,41 @@
             >
               호흡 가이드 시작
             </button>
+
+            <!-- Nature Sounds (New sub-content) -->
+            <div class="sound-scape-zone">
+              <p class="section-label">마음을 달래주는 소리</p>
+              <div class="sound-chips">
+                <button class="sound-chip" onclick="toggleSound('rain')"><i class="ti ti-cloud-rain"></i> 빗소리</button>
+                <button class="sound-chip" onclick="toggleSound('forest')"><i class="ti ti-trees"></i> 숲속</button>
+                <button class="sound-chip" onclick="toggleSound('waves')"><i class="ti ti-waves-up"></i> 파도</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Warmth Screen (New Content) -->
+        <section id="scr-warmth" class="screen" aria-labelledby="warmth-title">
+          <div class="warmth-container">
+            <div class="warmth-header">
+              <h2 id="warmth-title">서로의 온기 나누기</h2>
+              <p>배우자와 동시에 하트를 누르고 있으면<br>서로의 체온이 진동으로 전달됩니다.</p>
+            </div>
+            <div class="warmth-visual-area">
+              <div class="partner-connection-status" id="warmthPartnerStatus">
+                상대방을 기다리고 있어요...
+              </div>
+              <div class="hug-zone">
+                <div class="hug-circle-bg"></div>
+                <button class="hug-btn" id="hugBtn" 
+                        onmousedown="startHug()" onmouseup="stopHug()" 
+                        ontouchstart="startHug()" ontouchend="stopHug()">
+                  <i class="ti ti-heart-handshake"></i>
+                </button>
+                <div class="hug-progress-ring"></div>
+              </div>
+              <div class="hug-message" id="hugMessage">버튼을 길게 눌러보세요</div>
+            </div>
           </div>
         </section>
 
@@ -246,6 +281,15 @@
         </button>
         <button
           class="tab-item"
+          onclick="navigateTab('warmth')"
+          role="tab"
+          aria-selected="false"
+          aria-controls="scr-warmth"
+        >
+          <i class="ti ti-heart-handshake" aria-hidden="true"></i><span>온기</span>
+        </button>
+        <button
+          class="tab-item"
           onclick="navigateTab('dump')"
           role="tab"
           aria-selected="false"
@@ -312,8 +356,13 @@
           </section>
           <section class="guide-step">
             <div class="modal-icon"><i class="ti ti-ripple"></i></div>
-            <h3>평온: 숨 고르기</h3>
-            <p>화면의 리듬에 맞춰 호흡하며<br>복잡한 마음을 잠시 가라앉히세요.</p>
+            <h3>평온: 숨 고르기와 소리</h3>
+            <p>호흡 가이드와 함께 빗소리, 파도 소리 등<br>마음을 달래주는 소리를 들어보세요.</p>
+          </section>
+          <section class="guide-step">
+            <div class="modal-icon"><i class="ti ti-heart-handshake"></i></div>
+            <h3>온기: 체온 나누기</h3>
+            <p>두 분이 동시에 버튼을 누르고 있으면<br>서로의 온기가 진동으로 전달됩니다.</p>
           </section>
           <section class="guide-step">
             <div class="modal-icon"><i class="ti ti-trash-x"></i></div>
