@@ -10,19 +10,24 @@
   --primary-deep: #E05674;
   
   --bg-app: #F8F9FA;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-modal: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-modal: rgba(255, 255, 255, 0.98);
   
   --text-main: #1D1D1F;
-  --text-sub: #6E6E73;
-  --text-hint: #A1A1A6;
+  --text-sub: #48484A;
+  --text-hint: #8E8E93;
   
-  --border-light: rgba(0, 0, 0, 0.06);
-  --border-glass: rgba(255, 255, 255, 0.3);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --border-glass: rgba(255, 255, 255, 0.5);
   
+  /* Selectable Input Tokens */
+  --bg-input: #FFFFFF;
+  --bg-input-focus: #FFFFFF;
+  --border-input: #C6C6C8;
+
   /* Glassmorphism */
   --glass-blur: 24px;
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.85);
   
   /* Shadows */
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
@@ -56,17 +61,21 @@
   --primary-deep: #FF5C81;
   
   --bg-app: #0A0A0B;
-  --bg-card: rgba(28, 28, 30, 0.85);
-  --bg-modal: rgba(32, 32, 34, 0.95);
+  --bg-card: rgba(28, 28, 30, 0.95);
+  --bg-modal: rgba(32, 32, 34, 0.98);
   
   --text-main: #F5F5F7;
-  --text-sub: #A1A1A6;
-  --text-hint: #6E6E73;
+  --text-sub: #D1D1D6;
+  --text-hint: #8E8E93;
   
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-glass: rgba(255, 255, 255, 0.05);
+  --border-light: rgba(255, 255, 255, 0.12);
+  --border-glass: rgba(255, 255, 255, 0.08);
   
-  --glass-bg: rgba(28, 28, 30, 0.75);
+  --glass-bg: rgba(28, 28, 30, 0.85);
+
+  --bg-input: #121214;
+  --bg-input-focus: #0A0A0B;
+  --border-input: #3A3A3C;
   
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -80,17 +89,21 @@
     --primary-deep: #FF5C81;
     
     --bg-app: #0A0A0B;
-    --bg-card: rgba(28, 28, 30, 0.85);
-    --bg-modal: rgba(32, 32, 34, 0.95);
+    --bg-card: rgba(28, 28, 30, 0.95);
+    --bg-modal: rgba(32, 32, 34, 0.98);
     
     --text-main: #F5F5F7;
-    --text-sub: #A1A1A6;
-    --text-hint: #6E6E73;
+    --text-sub: #D1D1D6;
+    --text-hint: #8E8E93;
     
-    --border-light: rgba(255, 255, 255, 0.08);
-    --border-glass: rgba(255, 255, 255, 0.05);
+    --border-light: rgba(255, 255, 255, 0.12);
+    --border-glass: rgba(255, 255, 255, 0.08);
     
-    --glass-bg: rgba(28, 28, 30, 0.75);
+    --glass-bg: rgba(28, 28, 30, 0.85);
+
+    --bg-input: #121214;
+    --bg-input-focus: #0A0A0B;
+    --border-input: #3A3A3C;
     
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -107,6 +120,11 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+}
+
+input, textarea, [contenteditable="true"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 html, body {
@@ -628,7 +646,7 @@ button:active {
 
 /* ─── Mood Selector ─── */
 .mood-selector-zone {
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   z-index: 1;
   position: relative;
 }
@@ -965,21 +983,23 @@ button:active {
 .dump-editor textarea {
   width: 100%;
   height: 240px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
   border-radius: var(--radius-lg);
   padding: 24px;
   font-size: 17px;
+  font-weight: 500;
   line-height: 1.6;
   color: var(--text-main);
   resize: none;
   margin-bottom: 24px;
   box-shadow: var(--shadow-inner);
-  transition: border-color 0.3s var(--ease-standard), box-shadow 0.3s var(--ease-standard);
+  transition: all 0.3s var(--ease-standard);
 }
 
 .dump-editor textarea:focus {
   border-color: var(--primary);
+  background: var(--bg-input-focus);
   box-shadow: 0 0 0 4px var(--primary-soft);
   outline: none;
 }
@@ -1498,8 +1518,22 @@ button:active {
   min-height: 150px;
   margin-bottom: 8px;
   font-size: 17px;
-  border-color: var(--border-light);
-  background: var(--bg-app);
+  font-weight: 500;
+  border: 1.5px solid var(--border-input);
+  background: var(--bg-input);
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  width: 100%;
+  resize: none;
+  transition: all 0.25s var(--ease-standard);
+}
+
+.modal-body textarea:focus {
+  border-color: var(--primary);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+  outline: none;
 }
 
 .input-footer {
@@ -1766,5 +1800,647 @@ button:active {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Modern Compact Header Extensions ─── */
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.couple-settings-btn, .notif-bell-btn {
+  background: var(--primary-soft);
+  border: none;
+  color: var(--primary);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s var(--spring);
+}
+
+.couple-settings-btn:active, .notif-bell-btn:active {
+  transform: scale(0.9);
+  background: var(--primary);
+  color: white;
+}
+
+.couple-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -6px;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 6px;
+  border: 1.5px solid var(--bg-app);
+  color: white;
+  line-height: 1;
+}
+
+.couple-badge.public {
+  background: #FF9F43;
+}
+
+.couple-badge.private {
+  background: #22C55E;
+}
+
+.notif-count-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #FF4757;
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bg-app);
+  line-height: 1;
+}
+
+/* ─── Couple Connection Modal Details ─── */
+.couple-modal-body {
+  padding: 16px 8px;
+  text-align: left;
+}
+
+.modal-desc {
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.couple-code-box {
+  background: var(--bg-app);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  margin-bottom: 20px;
+}
+
+.code-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.code-display-group {
+  display: flex;
+  gap: 8px;
+}
+
+.code-display-group input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  text-align: center;
+  letter-spacing: 1px;
+  transition: all 0.25s ease;
+}
+
+.couple-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-hint);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 20px 0;
+}
+
+.couple-divider::before, .couple-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.couple-divider span {
+  padding: 0 10px;
+}
+
+.couple-input-box input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1.5px dashed var(--border-input);
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  color: var(--text-main);
+}
+
+.couple-input-box input:focus {
+  border-color: var(--primary);
+  border-style: solid;
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+  outline: none;
+}
+
+/* ─── Notification Feed Details ─── */
+.notif-modal-body {
+  padding: 8px 4px;
+  text-align: left;
+}
+
+.notif-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--text-hint);
+  width: 100%;
+}
+
+.notif-empty-state i {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.notif-empty-state p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+
+.notif-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  align-items: flex-start;
+  transition: all 0.3s var(--ease-standard);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.notif-item.unread {
+  border-left: 3.5px solid var(--primary);
+  background: var(--primary-soft);
+}
+
+.notif-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.notif-item-icon.wife {
+  background: rgba(255, 107, 139, 0.15);
+  color: var(--primary);
+}
+
+.notif-item-icon.husband {
+  background: rgba(77, 150, 255, 0.15);
+  color: #4D96FF;
+}
+
+.notif-item-icon.system {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22C55E;
+}
+
+.notif-item-content {
+  flex: 1;
+}
+
+.notif-item-body {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text-main);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.notif-item-time {
+  font-size: 11px;
+  color: var(--text-hint);
+  font-weight: 600;
+}
+
+/* ─── Dump Screen Healing Animation ─── */
+.dump-animation-viewport {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.dump-floating-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dump-floating-text {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 25%;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-glass);
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  animation: dumpTextFly 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  word-break: break-all;
+  z-index: 12;
+}
+
+.dump-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: dumpBubbleRise 3s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  z-index: 11;
+}
+
+@keyframes dumpTextFly {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 0;
+    filter: blur(8px);
+  }
+  10% {
+    transform: translateY(-20px) scale(1.02) rotate(-1deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  30% {
+    transform: translateY(-50px) scale(1) rotate(0deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: translateY(-280px) scale(0.5) rotate(3deg);
+    opacity: 0;
+    filter: blur(16px);
+  }
+}
+
+@keyframes dumpBubbleRise {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-400px) translateX(var(--dx)) scale(1.3);
+    opacity: 0;
+  }
+}
+
+/* ─── Touch optimizations for PWAs ─── */
+.tab-item, .mood-chip, .user-identity-box, .summon-main-btn, .primary-btn, .glass-btn, .hug-btn {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ─── Healing Self-Affirmation Card System ─── */
+.healing-tips-zone {
+  margin-top: 24px;
+  width: 100%;
+  text-align: left;
+}
+
+.healing-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.3s var(--spring);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.healing-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: var(--primary);
+}
+
+.healing-card:active {
+  transform: scale(0.97) translateY(2px);
+  box-shadow: var(--shadow-inner);
+}
+
+.healing-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.healing-quote-icon {
+  font-size: 28px;
+  color: var(--primary);
+  opacity: 0.25;
+  margin-bottom: -8px;
+}
+
+#healingAffirmationText {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--text-main);
+  word-break: keep-all;
+}
+
+.healing-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Theme Toggle Button (override to ensure correct size) ─── */
+.theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+}
+
+/* ─── Emotion Journal Zone (홈 화면) ─── */
+.emotion-journal-zone {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.emotion-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.emotion-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  border-radius: var(--radius-full);
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: all 0.25s var(--ease-standard);
+}
+
+.emotion-input::placeholder {
+  color: var(--text-hint);
+}
+
+.emotion-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.emotion-submit-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: none;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s var(--spring);
+}
+
+.emotion-submit-btn:active {
+  transform: scale(0.88);
+}
+
+.emotion-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.emotion-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  animation: slideInDown 0.3s var(--spring);
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.emotion-entry-emoji {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.emotion-entry-text {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emotion-entry-time {
+  font-size: 11px;
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+
+/* ─── Love Memo Zone (온기 화면) ─── */
+.love-memo-zone {
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+.love-memo-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.love-memo-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  border-radius: var(--radius-full);
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: all 0.25s var(--ease-standard);
+}
+
+.love-memo-input::placeholder {
+  color: var(--text-hint);
+}
+
+.love-memo-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.love-send-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: none;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s var(--spring);
+}
+
+.love-send-btn:active {
+  transform: scale(0.88);
+}
+
+.love-memo-display {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.love-memo-placeholder {
+  font-size: 13px;
+  color: var(--text-hint);
+  text-align: center;
+  display: block;
+  padding: 8px 0;
+}
+
+.love-memo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  border-left: 3px solid var(--border-light);
+  animation: slideInDown 0.3s var(--spring);
+}
+
+.love-memo-item.is-me {
+  border-left-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.love-memo-sender {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.love-memo-item.is-me .love-memo-sender {
+  color: var(--primary);
+}
+
+.love-memo-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.love-memo-time {
+  font-size: 11px;
+  color: var(--text-hint);
+  align-self: flex-end;
+}
+
+/* ─── Dark/Light Mode Placeholder Color Fix ─── */
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-hint);
+  opacity: 0.8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) input::placeholder,
+  :root:not([data-theme="light"]) textarea::placeholder {
+    color: var(--text-hint);
+    opacity: 0.8;
   }
 }
