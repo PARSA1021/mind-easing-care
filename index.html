@@ -1,18 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no"
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <meta name="theme-color" content="#F8F9FA" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0A0A0B" media="(prefers-color-scheme: dark)" />
+    <meta
+      name="theme-color"
+      content="#F8F9FA"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#0A0A0B"
+      media="(prefers-color-scheme: dark)"
+    />
     <title>마음안식처 | Our Mind</title>
 
     <link
@@ -21,468 +29,964 @@
     />
     <link rel="stylesheet" href="style.css" />
     <link rel="manifest" href="manifest.json" />
-    <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/ff6b8b/hearts.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="https://img.icons8.com/ios-filled/152/ff6b8b/hearts.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="https://img.icons8.com/ios-filled/180/ff6b8b/hearts.png" />
-    <link rel="apple-touch-icon" sizes="167x167" href="https://img.icons8.com/ios-filled/167/ff6b8b/hearts.png" />
+    <!-- Apple Touch Icons -->
+    <link
+      rel="apple-touch-icon"
+      href="https://img.icons8.com/ios-filled/512/ff6b8b/hearts.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="https://img.icons8.com/ios-filled/152/ff6b8b/hearts.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://img.icons8.com/ios-filled/180/ff6b8b/hearts.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="167x167"
+      href="https://img.icons8.com/ios-filled/167/ff6b8b/hearts.png"
+    />
 
     <script type="module" src="app.js"></script>
   </head>
   <body>
     <div class="app-container">
-      <div class="bg-decoration"></div>
-      <div class="bg-decoration-bottom"></div>
+      <div class="bg-decoration" aria-hidden="true"></div>
+      <div class="bg-decoration-bottom" aria-hidden="true"></div>
 
-      <!-- Role Selection Overlay (Start Screen) -->
-      <div id="roleSelectionOverlay" class="role-selection-overlay">
+      <!-- ── 역할 선택 오버레이 ── -->
+      <div
+        id="roleSelectionOverlay"
+        class="role-selection-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="roleSelectTitle"
+      >
         <div class="role-selection-content">
-          <div class="role-logo">
+          <div class="role-logo" aria-hidden="true">
             <i class="ti ti-heart-handshake"></i>
           </div>
-          <h2>오늘 당신은<br>누구로 함께할까요?</h2>
+          <h2 id="roleSelectTitle">오늘 당신은<br />누구로 함께할까요?</h2>
           <p>사용하실 역할을 선택해 주세요.</p>
-          
+
           <div class="role-options">
-            <button class="role-opt-btn wife" onclick="selectRole('wife')">
-              <div class="role-icon">🌸</div>
+            <button type="button" class="role-opt-btn wife" data-role="wife">
+              <div class="role-icon" aria-hidden="true">🌸</div>
               <span>저는 <strong>아내</strong>예요</span>
               <small>남편을 챙겨줄게요</small>
             </button>
-            <button class="role-opt-btn husband" onclick="selectRole('husband')">
-              <div class="role-icon">🙋‍♂️</div>
+            <button
+              type="button"
+              class="role-opt-btn husband"
+              data-role="husband"
+            >
+              <div class="role-icon" aria-hidden="true">🙋‍♂️</div>
               <span>저는 <strong>남편</strong>이에요</span>
               <small>아내를 챙겨줄게요</small>
             </button>
           </div>
-          
+
           <p class="role-footer-tip">언제든 상단 메뉴에서 바꿀 수 있어요</p>
         </div>
       </div>
 
-      <header class="app-header">
-        <div class="header-left">
-          <button class="help-btn" onclick="openHelpModal()" aria-label="도움말">
-            <i class="ti ti-help-circle"></i>
-          </button>
-          <button class="couple-settings-btn" onclick="openCoupleModal()" id="coupleSettingsBtn" aria-label="커플 연결 설정">
-            <i class="ti ti-link"></i>
-            <span id="coupleBadge" class="couple-badge public">공용</span>
-          </button>
-        </div>
-        
-        <div class="brand-text">
-          <h1>마음안식처</h1>
-          <div class="sync-status" id="syncStatus">
-            <span class="status-dot"></span>
+      <!-- ── 데스크탑 사이드바 네비게이션 ── -->
+      <nav
+        class="sidebar-nav"
+        id="sidebarNav"
+        role="navigation"
+        aria-label="사이드 네비게이션"
+      >
+        <div class="sidebar-brand">
+          <div class="sidebar-logo" aria-hidden="true">💑</div>
+          <h1 class="sidebar-title">마음안식처</h1>
+          <div
+            class="sync-status sidebar-sync"
+            id="syncStatusSidebar"
+            aria-live="polite"
+          >
+            <span class="status-dot" aria-hidden="true"></span>
             <span class="status-label">연결됨</span>
           </div>
         </div>
-
-        <div class="header-right">
-          <button class="notif-bell-btn" onclick="openNotifCenterModal()" id="notifBellBtn" aria-label="알림 센터">
-            <i class="ti ti-bell"></i>
-            <span class="notif-count-badge" id="notifCountBadge" style="display: none;">0</span>
+        <div class="sidebar-nav-items">
+          <button
+            type="button"
+            class="sidebar-item active"
+            data-tab="summon"
+            role="tab"
+            aria-selected="true"
+            aria-controls="scr-summon"
+          >
+            <i class="ti ti-home-heart" aria-hidden="true"></i>
+            <span>홈</span>
           </button>
-          <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" aria-label="테마 전환">
-            <i class="ti ti-sun"></i>
+          <button
+            type="button"
+            class="sidebar-item"
+            data-tab="breath"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-breath"
+          >
+            <i class="ti ti-ripple" aria-hidden="true"></i>
+            <span>평온</span>
           </button>
-          <div class="user-identity-box" onclick="switchIdentity()" id="userIdentityBox">
-            <span class="user-role-label" id="identityLabel">🌸 아내</span>
-            <i class="ti ti-arrows-exchange"></i>
-          </div>
+          <button
+            type="button"
+            class="sidebar-item"
+            data-tab="warmth"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-warmth"
+          >
+            <i class="ti ti-heart-handshake" aria-hidden="true"></i>
+            <span>온기</span>
+          </button>
+          <button
+            type="button"
+            class="sidebar-item"
+            data-tab="dump"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-dump"
+          >
+            <i class="ti ti-trash-x" aria-hidden="true"></i>
+            <span>비우기</span>
+          </button>
+          <button
+            type="button"
+            class="sidebar-item"
+            data-tab="cards"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-cards"
+          >
+            <i class="ti ti-notes" aria-hidden="true"></i>
+            <span>기록</span>
+          </button>
         </div>
-      </header>
+        <div class="sidebar-footer">
+          <button
+            type="button"
+            class="help-btn sidebar-help"
+            id="helpBtnSidebar"
+            aria-label="도움말"
+          >
+            <i class="ti ti-help-circle" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="theme-toggle-btn"
+            id="themeToggleBtnSidebar"
+            aria-label="테마 전환"
+          >
+            <i class="ti ti-sun" aria-hidden="true"></i>
+          </button>
+        </div>
+      </nav>
 
-      <main class="main-viewport">
-        <!-- Home Screen -->
-        <section id="scr-summon" class="screen active" aria-labelledby="home-title">
-          <div class="status-card">
-            <div class="partner-avatar pulse" id="partnerPulse" aria-hidden="true">
-              <i class="ti ti-user-heart"></i>
-              <div class="partner-mood-badge" id="partnerMoodBadge">✨</div>
-            </div>
-            <div class="status-text">
-              <h3 id="partnerName">상대방</h3>
-              <p id="partnerStatusDesc">연결을 확인하고 있어요</p>
-              <span class="last-active" id="partnerLastActive"></span>
-            </div>
-          </div>
-
-          <div class="mood-selector-zone">
-            <p class="section-label">지금 나의 기분은?</p>
-            <div class="mood-chips">
-              <button class="mood-chip" onclick="updateMyMood('fine')" data-mood="fine">😊 괜찮아요</button>
-              <button class="mood-chip" onclick="updateMyMood('tired')" data-mood="tired">😴 피곤해요</button>
-              <button class="mood-chip" onclick="updateMyMood('sad')" data-mood="sad">😢 우울해요</button>
-              <button class="mood-chip" onclick="updateMyMood('busy')" data-mood="busy">🔥 바빠요</button>
-              <button class="mood-chip" onclick="updateMyMood('love')" data-mood="love">💖 사랑해</button>
-            </div>
-          </div>
-
-          <!-- 오늘의 감정 미니 일지 -->
-          <div class="emotion-journal-zone">
-            <p class="section-label">💬 오늘 하루를 한 문장으로</p>
-            <div class="emotion-input-row">
-              <input
-                type="text"
-                id="emotionJournalInput"
-                class="emotion-input"
-                placeholder="오늘 어떤 하루였나요? 짧게 적어보세요..."
-                maxlength="40"
-              />
-              <button class="emotion-submit-btn" onclick="submitEmotionJournal()" aria-label="기록하기">
-                <i class="ti ti-check"></i>
-              </button>
-            </div>
-            <div id="emotionJournalFeed" class="emotion-feed"></div>
-          </div>
-
-          <div class="hero-section">
-            <h2 id="home-title">지금 혼자 견디기<br />힘든가요?</h2>
-            <p>버튼을 누르면 배우자의 휴대폰에<br />다정한 위로 신호가 즉시 전송됩니다.</p>
-          </div>
-
-          <div class="action-zone">
-            <div class="ripple-effect" aria-hidden="true"></div>
+      <!-- ── 메인 컬럼 (헤더 + 콘텐츠) ── -->
+      <div class="main-column">
+        <!-- ── 헤더 ── -->
+        <header class="app-header">
+          <div class="header-left">
             <button
-              class="summon-main-btn"
-              onclick="sendSignalToPartner()"
-              aria-label="도움 요청 신호 보내기"
+              type="button"
+              class="help-btn"
+              id="helpBtn"
+              aria-label="도움말 열기"
             >
-              <i class="ti ti-flame" aria-hidden="true"></i>
-              <span>나 지금 위로가 필요해</span>
+              <i class="ti ti-help-circle" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="couple-settings-btn"
+              id="coupleSettingsBtn"
+              aria-label="커플 연결 설정"
+            >
+              <i class="ti ti-link" aria-hidden="true"></i>
+              <span
+                id="coupleBadge"
+                class="couple-badge public"
+                aria-live="polite"
+                >공용</span
+              >
             </button>
           </div>
-        </section>
 
-        <!-- Breath Screen -->
-        <section id="scr-breath" class="screen" aria-labelledby="breath-title">
-          <div class="breath-container">
-            <div class="breath-guide-text">
-              <h2 id="breath-title">잠시 숨을 고르는 시간</h2>
-              <p id="breath-desc">화면의 리듬에 맞춰 천천히 숨을 들이마시고 내쉬어보세요.</p>
-            </div>
-            <div class="visual-breath-area" aria-hidden="true">
-              <div class="breath-circle" id="breath-circle"></div>
-              <div class="breath-icon"><i class="ti ti-wind"></i></div>
-            </div>
-            <button
-              class="glass-btn"
-              onclick="handleBreathToggle()"
-              id="breath-action-btn"
-            >
-              호흡 가이드 시작
-            </button>
-
-            <!-- 긍정 확언 & 마음 치유 컨텐츠 -->
-            <div class="healing-tips-zone">
-              <p class="section-label">🕊️ 오늘의 치유 확언</p>
-              <div class="healing-card" onclick="rollHealingAffirmation()">
-                <div class="healing-card-body">
-                  <i class="ti ti-quote healing-quote-icon"></i>
-                  <p id="healingAffirmationText">잠시 눈을 감고 크게 숨을 들이마신 뒤, 카드를 눌러 마음을 안아주는 오늘의 확언을 만나보세요.</p>
-                </div>
-                <div class="healing-card-footer">
-                  <span>카드를 터치하여 다른 확언 읽기</span>
-                </div>
-              </div>
+          <div class="brand-text">
+            <h1>마음안식처</h1>
+            <div class="sync-status" id="syncStatus" aria-live="polite">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span class="status-label">연결됨</span>
             </div>
           </div>
-        </section>
 
-        <!-- Warmth Screen (New Content) -->
-        <section id="scr-warmth" class="screen" aria-labelledby="warmth-title">
-          <div class="warmth-container">
-            <div class="warmth-header">
-              <h2 id="warmth-title">서로의 온기 나누기</h2>
-              <p>배우자와 동시에 하트를 누르고 있으면<br>서로의 체온이 진동으로 전달됩니다.</p>
-            </div>
-            <div class="warmth-visual-area">
-              <div class="partner-connection-status" id="warmthPartnerStatus">
-                상대방을 기다리고 있어요...
+          <div class="header-right">
+            <button
+              type="button"
+              class="notif-bell-btn"
+              id="notifBellBtn"
+              aria-label="알림 센터 열기"
+            >
+              <i class="ti ti-bell" aria-hidden="true"></i>
+              <span
+                class="notif-count-badge"
+                id="notifCountBadge"
+                aria-live="polite"
+                aria-label="미확인 알림"
+                >0</span
+              >
+            </button>
+            <button
+              type="button"
+              class="theme-toggle-btn"
+              id="themeToggleBtn"
+              aria-label="테마 전환"
+            >
+              <i class="ti ti-sun" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="user-identity-box"
+              id="userIdentityBox"
+              aria-label="역할 전환"
+            >
+              <span class="user-role-label" id="identityLabel">🌸 아내</span>
+              <i class="ti ti-arrows-exchange" aria-hidden="true"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- ── 메인 화면 ── -->
+        <main class="main-viewport">
+          <!-- 홈: 신호 보내기 -->
+          <section
+            id="scr-summon"
+            class="screen active"
+            aria-labelledby="home-title"
+          >
+            <div class="status-card">
+              <div
+                class="partner-avatar pulse"
+                id="partnerPulse"
+                aria-hidden="true"
+              >
+                <i class="ti ti-user-heart"></i>
+                <div class="partner-mood-badge" id="partnerMoodBadge">✨</div>
               </div>
-              <div class="hug-zone">
-                <div class="hug-circle-bg"></div>
-                <button class="hug-btn" id="hugBtn" 
-                        onmousedown="startHug()" onmouseup="stopHug()" 
-                        ontouchstart="startHug()" ontouchend="stopHug()">
-                  <i class="ti ti-heart-handshake"></i>
+              <div class="status-text">
+                <h3 id="partnerName">상대방</h3>
+                <p id="partnerStatusDesc">연결을 확인하고 있어요</p>
+                <span
+                  class="last-active"
+                  id="partnerLastActive"
+                  aria-live="polite"
+                ></span>
+              </div>
+            </div>
+
+            <div class="mood-selector-zone">
+              <p class="section-label">지금 나의 기분은?</p>
+              <div class="mood-chips" role="group" aria-label="기분 선택">
+                <button
+                  type="button"
+                  class="mood-chip"
+                  data-mood="fine"
+                  aria-pressed="false"
+                >
+                  😊 괜찮아요
                 </button>
-                <div class="hug-progress-ring"></div>
+                <button
+                  type="button"
+                  class="mood-chip"
+                  data-mood="tired"
+                  aria-pressed="false"
+                >
+                  😴 피곤해요
+                </button>
+                <button
+                  type="button"
+                  class="mood-chip"
+                  data-mood="sad"
+                  aria-pressed="false"
+                >
+                  😢 우울해요
+                </button>
+                <button
+                  type="button"
+                  class="mood-chip"
+                  data-mood="busy"
+                  aria-pressed="false"
+                >
+                  🔥 바빠요
+                </button>
+                <button
+                  type="button"
+                  class="mood-chip"
+                  data-mood="love"
+                  aria-pressed="false"
+                >
+                  💖 사랑해
+                </button>
               </div>
-              <div class="hug-message" id="hugMessage">버튼을 길게 눌러보세요</div>
             </div>
 
-            <!-- 사랑 메모 섹션 -->
-            <div class="love-memo-zone">
-              <p class="section-label">💌 지금 이 순간, 한 마디</p>
-              <div class="love-memo-row">
+            <div class="emotion-journal-zone">
+              <p class="section-label">💬 오늘 하루를 한 문장으로</p>
+              <div class="emotion-input-row">
+                <label for="emotionJournalInput" class="sr-only"
+                  >오늘의 감정 일지</label
+                >
                 <input
                   type="text"
-                  id="loveMemoInput"
-                  class="love-memo-input"
-                  placeholder="상대방에게 보내고 싶은 짧은 사랑의 말..."
-                  maxlength="30"
+                  id="emotionJournalInput"
+                  class="emotion-input"
+                  placeholder="오늘 어떤 하루였나요? 짧게 적어보세요..."
+                  maxlength="40"
+                  autocomplete="off"
                 />
-                <button class="love-send-btn" onclick="sendLoveMemo()" aria-label="사랑 메모 보내기">
-                  <i class="ti ti-heart-share"></i>
+                <button
+                  type="button"
+                  class="emotion-submit-btn"
+                  id="emotionSubmitBtn"
+                  aria-label="감정 일지 기록하기"
+                >
+                  <i class="ti ti-check" aria-hidden="true"></i>
                 </button>
               </div>
-              <div id="loveMemoDisplay" class="love-memo-display">
-                <span class="love-memo-placeholder">아직 보낸 메모가 없어요. 사랑을 담아 보내보세요 💕</span>
+              <div
+                id="emotionJournalFeed"
+                class="emotion-feed"
+                aria-live="polite"
+                aria-label="감정 일지 목록"
+              ></div>
+            </div>
+
+            <div class="hero-section">
+              <h2 id="home-title">지금 혼자 견디기<br />힘든가요?</h2>
+              <p>
+                버튼을 누르면 배우자의 휴대폰에<br />다정한 위로 신호가 즉시
+                전송됩니다.
+              </p>
+            </div>
+
+            <div class="action-zone">
+              <div class="ripple-effect" aria-hidden="true"></div>
+              <button
+                type="button"
+                class="summon-main-btn"
+                id="summonMainBtn"
+                aria-label="도움 요청 신호 보내기"
+              >
+                <i class="ti ti-flame" aria-hidden="true"></i>
+                <span>나 지금 위로가 필요해</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- 평온: 호흡 -->
+          <section
+            id="scr-breath"
+            class="screen"
+            aria-labelledby="breath-title"
+          >
+            <div class="breath-container">
+              <div class="breath-guide-text">
+                <h2 id="breath-title">잠시 숨을 고르는 시간</h2>
+                <p id="breath-desc">
+                  화면의 리듬에 맞춰 천천히 숨을 들이마시고 내쉬어보세요.
+                </p>
+              </div>
+              <div class="visual-breath-area" aria-hidden="true">
+                <div class="breath-circle" id="breath-circle"></div>
+                <div class="breath-icon"><i class="ti ti-wind"></i></div>
+              </div>
+              <button type="button" class="glass-btn" id="breath-action-btn">
+                호흡 가이드 시작
+              </button>
+
+              <div class="healing-tips-zone">
+                <p class="section-label">🕊️ 오늘의 치유 확언</p>
+                <div
+                  class="healing-card"
+                  id="healingCard"
+                  role="button"
+                  tabindex="0"
+                  aria-label="새로운 확언 카드 보기"
+                >
+                  <div class="healing-card-body">
+                    <i
+                      class="ti ti-quote healing-quote-icon"
+                      aria-hidden="true"
+                    ></i>
+                    <p id="healingAffirmationText">
+                      잠시 눈을 감고 크게 숨을 들이마신 뒤, 카드를 눌러 마음을
+                      안아주는 오늘의 확언을 만나보세요.
+                    </p>
+                  </div>
+                  <div class="healing-card-footer">
+                    <span>카드를 터치하여 다른 확언 읽기</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Dump Screen -->
-        <section id="scr-dump" class="screen" aria-labelledby="dump-title">
-          <div class="dump-header">
-            <h2 id="dump-title">복잡한 마음 덜어내기</h2>
-            <p>머릿속을 어지럽히는 생각들을 적고 하늘로 멀리 날려보내세요.</p>
-          </div>
-          <div class="dump-animation-viewport" id="dumpAnimViewport"></div>
-          <div class="dump-editor">
-            <textarea
-              id="dump-textarea-input"
-              placeholder="지금 당신을 힘들게 하는 것들을 여기에 다 쏟아내세요..."
-              aria-label="불안한 마음 작성"
-            ></textarea>
-            <button class="primary-btn" onclick="executeTextDumping()">
-              <i class="ti ti-send" aria-hidden="true"></i> 시원하게 날려보내기
-            </button>
-          </div>
-        </section>
+          <!-- 온기: 허그 -->
+          <section
+            id="scr-warmth"
+            class="screen"
+            aria-labelledby="warmth-title"
+          >
+            <div class="warmth-container">
+              <div class="warmth-header">
+                <h2 id="warmth-title">서로의 온기 나누기</h2>
+                <p>
+                  배우자와 동시에 하트를 누르고 있으면<br />서로의 체온이
+                  진동으로 전달됩니다.
+                </p>
+              </div>
+              <div class="warmth-visual-area">
+                <div
+                  class="partner-connection-status"
+                  id="warmthPartnerStatus"
+                  aria-live="polite"
+                >
+                  상대방을 기다리고 있어요...
+                </div>
+                <div class="hug-zone">
+                  <div class="hug-circle-bg" aria-hidden="true"></div>
+                  <button
+                    type="button"
+                    class="hug-btn"
+                    id="hugBtn"
+                    aria-label="온기 나누기 버튼 (길게 누르세요)"
+                    aria-pressed="false"
+                  >
+                    <i class="ti ti-heart-handshake" aria-hidden="true"></i>
+                  </button>
+                  <div class="hug-progress-ring" aria-hidden="true"></div>
+                </div>
+                <div class="hug-message" id="hugMessage" aria-live="polite">
+                  버튼을 길게 눌러보세요
+                </div>
+              </div>
 
-        <!-- Cards Screen -->
-        <section id="scr-cards" class="screen" aria-labelledby="cards-title">
-          <div class="card-stack">
-            <!-- Empty State (Hidden by default) -->
-            <div id="cards-empty-state" class="empty-state" style="display: none;">
-              <div class="empty-icon"><i class="ti ti-notes-off"></i></div>
-              <p>아직 우리만의 따뜻한 기록이 없어요.<br>첫 번째 사랑의 메시지를 남겨볼까요?</p>
-              <button class="glass-btn sm" onclick="addComfortMessage()">따뜻한 마음 남기기</button>
+              <div class="love-memo-zone">
+                <p class="section-label">💌 지금 이 순간, 한 마디</p>
+                <div class="love-memo-row">
+                  <label for="loveMemoInput" class="sr-only"
+                    >사랑 메모 입력</label
+                  >
+                  <input
+                    type="text"
+                    id="loveMemoInput"
+                    class="love-memo-input"
+                    placeholder="상대방에게 보내고 싶은 짧은 사랑의 말..."
+                    maxlength="30"
+                    autocomplete="off"
+                  />
+                  <button
+                    type="button"
+                    class="love-send-btn"
+                    id="loveSendBtn"
+                    aria-label="사랑 메모 보내기"
+                  >
+                    <i class="ti ti-heart-share" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div
+                  id="loveMemoDisplay"
+                  class="love-memo-display"
+                  aria-live="polite"
+                >
+                  <span class="love-memo-placeholder"
+                    >아직 보낸 메모가 없어요. 사랑을 담아 보내보세요 💕</span
+                  >
+                </div>
+              </div>
             </div>
+          </section>
 
+          <!-- 비우기: 덤핑 -->
+          <section id="scr-dump" class="screen" aria-labelledby="dump-title">
+            <div class="dump-header">
+              <h2 id="dump-title">복잡한 마음 덜어내기</h2>
+              <p>머릿속을 어지럽히는 생각들을 적고 하늘로 멀리 날려보내세요.</p>
+            </div>
             <div
-              id="comfort-card-main"
-              class="comfort-card"
-              onclick="drawNextComfortCard()"
-              role="button"
-              aria-label="다음 위로 카드 보기"
-            >
-              <div class="card-quote" aria-hidden="true"><i class="ti ti-quote"></i></div>
-              <p id="display-card-msg">서로를 향한 다정한 마음들이<br />여기에 하나씩 표시됩니다.</p>
-              <div class="card-footer">
-                <span id="display-card-meta">Warm Message</span>
-                <button class="card-like-btn" onclick="event.stopPropagation(); toggleLikeCard()" id="cardLikeBtn">
-                  <i class="ti ti-heart"></i> <span id="cardLikeCount">0</span>
+              class="dump-animation-viewport"
+              id="dumpAnimViewport"
+              aria-hidden="true"
+            ></div>
+            <div class="dump-editor">
+              <label for="dump-textarea-input" class="sr-only"
+                >불안한 마음 작성</label
+              >
+              <textarea
+                id="dump-textarea-input"
+                placeholder="지금 당신을 힘들게 하는 것들을 여기에 다 쏟아내세요..."
+              ></textarea>
+              <button type="button" class="primary-btn" id="dumpSubmitBtn">
+                <i class="ti ti-send" aria-hidden="true"></i> 시원하게
+                날려보내기
+              </button>
+            </div>
+          </section>
+
+          <!-- 기록: 위로 카드 -->
+          <section id="scr-cards" class="screen" aria-labelledby="cards-title">
+            <div class="card-stack">
+              <div
+                id="cards-empty-state"
+                class="empty-state is-hidden"
+                aria-hidden="true"
+              >
+                <div class="empty-icon" aria-hidden="true">
+                  <i class="ti ti-notes-off"></i>
+                </div>
+                <p>
+                  아직 우리만의 따뜻한 기록이 없어요.<br />첫 번째 사랑의
+                  메시지를 남겨볼까요?
+                </p>
+                <button type="button" class="glass-btn sm" id="emptyAddMsgBtn">
+                  따뜻한 마음 남기기
                 </button>
               </div>
-            </div>
-            <div class="card-actions">
-              <button
-                class="icon-btn"
-                onclick="addComfortMessage()"
-                aria-label="위로 메시지 추가"
-              >
-                <i class="ti ti-plus" aria-hidden="true"></i>
-              </button>
-              <button
-                class="icon-btn"
-                onclick="toggleCardView()"
-                aria-label="목록 보기"
-                id="viewToggleBtn"
-              >
-                <i class="ti ti-list" aria-hidden="true"></i>
-              </button>
-              <button
-                class="icon-btn heart"
-                onclick="sendHeart()"
-                aria-label="하트 보내기"
-              >
-                <i class="ti ti-heart" aria-hidden="true"></i>
-              </button>
-            </div>
 
-            <!-- Card List View (Hidden by default) -->
-            <div id="comfort-card-list" class="card-list-view" style="display: none;">
-              <div class="list-header">
-                <h3>우리의 소중한 기록들</h3>
-                <button class="text-btn" onclick="toggleCardView()">돌아가기</button>
+              <div
+                id="comfort-card-main"
+                class="comfort-card"
+                role="button"
+                aria-label="다음 위로 카드 보기"
+                tabindex="0"
+              >
+                <div class="card-quote" aria-hidden="true">
+                  <i class="ti ti-quote"></i>
+                </div>
+                <p id="display-card-msg">
+                  서로를 향한 다정한 마음들이<br />여기에 하나씩 표시됩니다.
+                </p>
+                <div class="card-footer">
+                  <span id="display-card-meta">Warm Message</span>
+                  <button
+                    type="button"
+                    class="card-like-btn"
+                    id="cardLikeBtn"
+                    aria-label="좋아요"
+                  >
+                    <i class="ti ti-heart" aria-hidden="true"></i>
+                    <span id="cardLikeCount">0</span>
+                  </button>
+                </div>
               </div>
-              <div id="card-list-container" class="list-container">
-                <!-- Cards will be rendered here -->
+
+              <div class="card-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  id="addMsgBtn"
+                  aria-label="위로 메시지 추가"
+                >
+                  <i class="ti ti-plus" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  id="viewToggleBtn"
+                  aria-label="목록 보기"
+                >
+                  <i class="ti ti-list" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn heart"
+                  id="sendHeartBtn"
+                  aria-label="하트 보내기"
+                >
+                  <i class="ti ti-heart" aria-hidden="true"></i>
+                </button>
               </div>
+
+              <div
+                id="comfort-card-list"
+                class="card-list-view is-hidden"
+                aria-hidden="true"
+              >
+                <div class="list-header">
+                  <h3>우리의 소중한 기록들</h3>
+                  <button type="button" class="text-btn" id="cardListBackBtn">
+                    돌아가기
+                  </button>
+                </div>
+                <div id="card-list-container" class="list-container"></div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <!-- ── 탭 바 ── -->
+        <nav class="tab-bar" role="tablist" aria-label="메인 탭 네비게이션">
+          <button
+            type="button"
+            class="tab-item active"
+            data-tab="summon"
+            role="tab"
+            aria-selected="true"
+            aria-controls="scr-summon"
+          >
+            <i class="ti ti-home-heart" aria-hidden="true"></i><span>홈</span>
+          </button>
+          <button
+            type="button"
+            class="tab-item"
+            data-tab="breath"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-breath"
+          >
+            <i class="ti ti-ripple" aria-hidden="true"></i><span>평온</span>
+          </button>
+          <button
+            type="button"
+            class="tab-item"
+            data-tab="warmth"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-warmth"
+          >
+            <i class="ti ti-heart-handshake" aria-hidden="true"></i
+            ><span>온기</span>
+          </button>
+          <button
+            type="button"
+            class="tab-item"
+            data-tab="dump"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-dump"
+          >
+            <i class="ti ti-trash-x" aria-hidden="true"></i><span>비우기</span>
+          </button>
+          <button
+            type="button"
+            class="tab-item"
+            data-tab="cards"
+            role="tab"
+            aria-selected="false"
+            aria-controls="scr-cards"
+          >
+            <i class="ti ti-notes" aria-hidden="true"></i><span>기록</span>
+          </button>
+          <div class="tab-indicator" id="tabIndicator" aria-hidden="true"></div>
+        </nav>
+      </div>
+      <!-- /.main-column -->
+
+      <!-- ── 데스크탑 우측 파트너 패널 ── -->
+      <aside class="partner-panel" id="partnerPanel" aria-label="파트너 정보">
+        <div class="pp-header">
+          <h2>우리 둘</h2>
+          <span id="coupleBadgeSidebar" class="couple-badge public">공용</span>
+        </div>
+
+        <div class="pp-partner-card">
+          <div
+            class="partner-avatar pulse"
+            id="partnerPulseSidebar"
+            aria-hidden="true"
+          >
+            <i class="ti ti-user-heart"></i>
+            <div class="partner-mood-badge" id="partnerMoodBadgeSidebar">
+              ✨
             </div>
           </div>
-        </section>
-      </main>
+          <div class="pp-partner-info">
+            <h3 id="partnerNameSidebar">상대방</h3>
+            <p id="partnerStatusDescSidebar">연결을 확인하고 있어요</p>
+            <span
+              class="last-active"
+              id="partnerLastActiveSidebar"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
 
-      <nav class="tab-bar" role="tablist">
-        <button
-          class="tab-item active"
-          onclick="navigateTab('summon')"
-          role="tab"
-          aria-selected="true"
-          aria-controls="scr-summon"
-        >
-          <i class="ti ti-home-heart" aria-hidden="true"></i><span>홈</span>
-        </button>
-        <button
-          class="tab-item"
-          onclick="navigateTab('breath')"
-          role="tab"
-          aria-selected="false"
-          aria-controls="scr-breath"
-        >
-          <i class="ti ti-ripple" aria-hidden="true"></i><span>평온</span>
-        </button>
-        <button
-          class="tab-item"
-          onclick="navigateTab('warmth')"
-          role="tab"
-          aria-selected="false"
-          aria-controls="scr-warmth"
-        >
-          <i class="ti ti-heart-handshake" aria-hidden="true"></i><span>온기</span>
-        </button>
-        <button
-          class="tab-item"
-          onclick="navigateTab('dump')"
-          role="tab"
-          aria-selected="false"
-          aria-controls="scr-dump"
-        >
-          <i class="ti ti-trash-x" aria-hidden="true"></i><span>비우기</span>
-        </button>
-        <button
-          class="tab-item"
-          onclick="navigateTab('cards')"
-          role="tab"
-          aria-selected="false"
-          aria-controls="scr-cards"
-        >
-          <i class="ti ti-notes" aria-hidden="true"></i><span>기록</span>
-        </button>
-        <div class="tab-indicator" id="tabIndicator"></div>
-      </nav>
+        <div class="pp-mood-section">
+          <p class="section-label">파트너 기분</p>
+          <div class="pp-mood-display" id="ppMoodDisplay">
+            <span class="pp-mood-emoji" id="ppMoodEmoji">✨</span>
+            <span class="pp-mood-text" id="ppMoodText">연결 중...</span>
+          </div>
+        </div>
+
+        <div class="pp-actions">
+          <p class="section-label">빠른 액션</p>
+          <button
+            type="button"
+            class="pp-action-btn signal"
+            id="ppSendSignalBtn"
+          >
+            <i class="ti ti-flame" aria-hidden="true"></i>
+            <span>위로 신호 보내기</span>
+          </button>
+          <button type="button" class="pp-action-btn heart" id="ppSendHeartBtn">
+            <i class="ti ti-heart" aria-hidden="true"></i>
+            <span>하트 보내기</span>
+          </button>
+          <button type="button" class="pp-action-btn couple" id="ppCoupleBtn">
+            <i class="ti ti-link" aria-hidden="true"></i>
+            <span>커플 코드 설정</span>
+          </button>
+          <button type="button" class="pp-action-btn notif" id="ppNotifBtn">
+            <i class="ti ti-bell" aria-hidden="true"></i>
+            <span>알림 센터</span>
+            <span
+              class="notif-count-badge"
+              id="notifCountBadgeSidebar"
+              aria-live="polite"
+              >0</span
+            >
+          </button>
+        </div>
+
+        <div class="pp-identity">
+          <p class="section-label">나의 역할</p>
+          <button
+            type="button"
+            class="user-identity-box pp-identity-btn"
+            id="userIdentityBoxSidebar"
+            aria-label="역할 전환"
+          >
+            <span class="user-role-label" id="identityLabelSidebar"
+              >🌸 아내</span
+            >
+            <i class="ti ti-arrows-exchange" aria-hidden="true"></i>
+          </button>
+        </div>
+      </aside>
     </div>
+    <!-- /.app-container -->
 
-    <!-- Modals -->
-    <!-- Signal Message Modal -->
-    <div id="signalMessageModal" class="modal-overlay bottom-sheet" role="dialog" aria-modal="true">
+    <!-- ════════ 모달 / 오버레이 영역 ════════ -->
+
+    <!-- 신호 메시지 모달 -->
+    <div
+      id="signalMessageModal"
+      class="modal-overlay bottom-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="signalModalTitle"
+      aria-hidden="true"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h3 id="signalModalTitle">배우자에게 보낼 말</h3>
-          <button class="close-icon-btn" onclick="closeSignalMessageModal()"><i class="ti ti-x"></i></button>
+          <button
+            type="button"
+            class="close-icon-btn"
+            id="closeSignalMsgBtn"
+            aria-label="모달 닫기"
+          >
+            <i class="ti ti-x" aria-hidden="true"></i>
+          </button>
         </div>
         <div class="modal-body">
-          <textarea 
-            id="signal-custom-input" 
+          <label for="signal-custom-input" class="sr-only"
+            >신호 메시지 입력</label
+          >
+          <textarea
+            id="signal-custom-input"
             placeholder="지금 어떤 마음인지 짧게 남겨주세요..."
             maxlength="50"
-            oninput="updateSignalCharCount(this)"
           ></textarea>
           <div class="input-footer">
-            <span id="signal-char-count">0 / 50</span>
+            <span id="signal-char-count" aria-live="polite">0 / 50</span>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="primary-btn full" onclick="confirmSendSignal()" id="signalConfirmBtn">
-            <i class="ti ti-flame"></i> 신호 보내기
+          <button type="button" class="primary-btn full" id="signalConfirmBtn">
+            <i class="ti ti-flame" aria-hidden="true"></i> 신호 보내기
           </button>
         </div>
       </div>
     </div>
 
-    <div id="globalAlertModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <!-- 전역 알림 모달 -->
+    <div
+      id="globalAlertModal"
+      class="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      aria-hidden="true"
+    >
       <div class="modal-content">
-        <div class="modal-icon" aria-hidden="true"><i class="ti ti-bell-ringing"></i></div>
+        <div class="modal-icon" aria-hidden="true">
+          <i class="ti ti-bell-ringing"></i>
+        </div>
         <h3 id="modalTitle">소중한 알림</h3>
         <p id="modalBody">내용</p>
-        <button class="modal-close-btn" onclick="closeModal()">확인했어요</button>
+        <button type="button" class="modal-close-btn" id="globalAlertCloseBtn">
+          확인했어요
+        </button>
       </div>
     </div>
 
-    <div id="helpGuideModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <!-- 가이드 모달 -->
+    <div
+      id="helpGuideModal"
+      class="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="guideTitle"
+      aria-hidden="true"
+    >
       <div class="modal-content guide-modal">
-        <div class="guide-scroll-container">
-          <section class="guide-step">
-            <div class="modal-icon"><i class="ti ti-home-heart"></i></div>
-            <h3>홈: 마음 전하기</h3>
-            <p>지금 바로 위로가 필요할 때<br>버튼을 눌러 배우자에게 알려보세요.</p>
+        <div class="guide-scroll-container" role="list">
+          <section class="guide-step" role="listitem">
+            <div class="modal-icon" aria-hidden="true">
+              <i class="ti ti-home-heart"></i>
+            </div>
+            <h3 id="guideTitle">홈: 마음 전하기</h3>
+            <p>
+              지금 바로 위로가 필요할 때<br />버튼을 눌러 배우자에게 알려보세요.
+            </p>
           </section>
-          <section class="guide-step">
-            <div class="modal-icon"><i class="ti ti-ripple"></i></div>
+          <section class="guide-step" role="listitem">
+            <div class="modal-icon" aria-hidden="true">
+              <i class="ti ti-ripple"></i>
+            </div>
             <h3>평온: 숨 고르기와 확언</h3>
-            <p>호흡 가이드와 함께 오늘의 치유 확언 카드를<br>터치하여 마음에 힘을 불어넣어 보세요.</p>
+            <p>
+              호흡 가이드와 함께 오늘의 치유 확언 카드를<br />터치하여 마음에
+              힘을 불어넣어 보세요.
+            </p>
           </section>
-          <section class="guide-step">
-            <div class="modal-icon"><i class="ti ti-heart-handshake"></i></div>
+          <section class="guide-step" role="listitem">
+            <div class="modal-icon" aria-hidden="true">
+              <i class="ti ti-heart-handshake"></i>
+            </div>
             <h3>온기: 체온 나누기</h3>
-            <p>두 분이 동시에 버튼을 누르고 있으면<br>서로의 온기가 진동으로 전달됩니다.</p>
+            <p>
+              두 분이 동시에 버튼을 누르고 있으면<br />서로의 온기가 진동으로
+              전달됩니다.
+            </p>
           </section>
-          <section class="guide-step">
-            <div class="modal-icon"><i class="ti ti-trash-x"></i></div>
+          <section class="guide-step" role="listitem">
+            <div class="modal-icon" aria-hidden="true">
+              <i class="ti ti-trash-x"></i>
+            </div>
             <h3>비우기: 생각 털기</h3>
-            <p>머릿속을 어지럽히는 생각들을<br>적어서 시원하게 날려보내세요.</p>
+            <p>
+              머릿속을 어지럽히는 생각들을<br />적어서 시원하게 날려보내세요.
+            </p>
           </section>
-          <section class="guide-step">
-            <div class="modal-icon"><i class="ti ti-notes"></i></div>
+          <section class="guide-step" role="listitem">
+            <div class="modal-icon" aria-hidden="true">
+              <i class="ti ti-notes"></i>
+            </div>
             <h3>기록: 함께한 추억</h3>
-            <p>서로에게 남긴 따뜻한 한마디를<br>하나씩 꺼내보며 사랑을 나누세요.</p>
+            <p>
+              서로에게 남긴 따뜻한 한마디를<br />하나씩 꺼내보며 사랑을
+              나누세요.
+            </p>
           </section>
-          <section class="guide-step">
-            <div class="modal-icon notification"><i class="ti ti-bell-bolt"></i></div>
+          <section class="guide-step" role="listitem">
+            <div class="modal-icon notification" aria-hidden="true">
+              <i class="ti ti-bell-bolt"></i>
+            </div>
             <h3>알림 잘 받는 법</h3>
-            <p>1. 앱을 홈 화면에 <strong>'설치'</strong> 하기<br>
-               2. 브라우저 <strong>알림 권한</strong> 꼭 허용하기<br>
-               3. 배터리 최적화 제외 설정하기</p>
+            <p>
+              1. 앱을 홈 화면에 <strong>'설치'</strong> 하기<br />
+              2. 브라우저 <strong>알림 권한</strong> 꼭 허용하기<br />
+              3. 배터리 최적화 제외 설정하기
+            </p>
           </section>
         </div>
-        <div class="guide-pagination">
+        <div class="guide-pagination" aria-hidden="true">
           <span class="dot active"></span>
           <span class="dot"></span>
           <span class="dot"></span>
           <span class="dot"></span>
           <span class="dot"></span>
+          <span class="dot"></span>
         </div>
-        <button class="modal-close-btn" onclick="closeHelpModal()">준비되었어요!</button>
+        <button type="button" class="modal-close-btn" id="helpGuideCloseBtn">
+          준비되었어요!
+        </button>
       </div>
     </div>
 
-    <!-- Message Write Modal (Full Screen Bottom Sheet Style) -->
-    <div id="messageWriteModal" class="modal-overlay bottom-sheet" role="dialog" aria-modal="true">
+    <!-- 메시지 작성 모달 -->
+    <div
+      id="messageWriteModal"
+      class="modal-overlay bottom-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="msgWriteTitle"
+      aria-hidden="true"
+    >
       <div class="modal-content">
         <div class="modal-header">
-          <h3>따뜻한 마음 남기기</h3>
-          <button class="close-icon-btn" onclick="closeMessageModal()"><i class="ti ti-x"></i></button>
+          <h3 id="msgWriteTitle">따뜻한 마음 남기기</h3>
+          <button
+            type="button"
+            class="close-icon-btn"
+            id="closeMsgWriteBtn"
+            aria-label="모달 닫기"
+          >
+            <i class="ti ti-x" aria-hidden="true"></i>
+          </button>
         </div>
         <div class="modal-body">
-          <textarea 
-            id="comfort-message-input" 
+          <label for="comfort-message-input" class="sr-only"
+            >위로 메시지 입력</label
+          >
+          <textarea
+            id="comfort-message-input"
             placeholder="배우자에게 힘이 될 다정한 한마디를 적어주세요..."
             maxlength="100"
-            oninput="updateCharCount(this)"
           ></textarea>
           <div class="input-footer">
-            <span id="char-count">0 / 100</span>
+            <span id="char-count" aria-live="polite">0 / 100</span>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="primary-btn full" onclick="submitComfortMessage()">
-            <i class="ti ti-heart-share"></i> 예쁜 마음 전하기
+          <button
+            type="button"
+            class="primary-btn full"
+            id="submitComfortMsgBtn"
+          >
+            <i class="ti ti-heart-share" aria-hidden="true"></i> 예쁜 마음
+            전하기
           </button>
         </div>
       </div>
     </div>
 
-    <div class="toast-message" id="globalToast" aria-live="polite"></div>
+    <!-- 토스트 -->
+    <div
+      class="toast-message"
+      id="globalToast"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
 
-    <!-- Notification Banner -->
-    <div id="notificationBanner" class="notification-banner">
-      <div class="notif-icon" id="notifBannerIcon">
+    <!-- 인앱 알림 배너 -->
+    <div
+      id="notificationBanner"
+      class="notification-banner"
+      aria-hidden="true"
+      aria-live="assertive"
+    >
+      <div class="notif-icon" id="notifBannerIcon" aria-hidden="true">
         <i class="ti ti-bell-bolt"></i>
       </div>
       <div class="notif-content">
@@ -491,11 +995,18 @@
       </div>
     </div>
 
-    <!-- Signal Arrival Overlay (Premium Notification) -->
-    <div id="signalArrivalOverlay" class="signal-overlay">
-      <div class="signal-glow"></div>
+    <!-- 신호 도착 오버레이 -->
+    <div
+      id="signalArrivalOverlay"
+      class="signal-overlay"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="signalSenderName"
+      aria-hidden="true"
+    >
+      <div class="signal-glow" aria-hidden="true"></div>
       <div class="signal-content">
-        <div class="signal-icon-box">
+        <div class="signal-icon-box" aria-hidden="true">
           <i class="ti ti-heart-filled"></i>
           <div class="signal-pulse-rings">
             <span></span><span></span><span></span>
@@ -503,80 +1014,154 @@
         </div>
         <h2 id="signalSenderName">배우자</h2>
         <p id="signalDefaultText">지금 당신의 따뜻한 온기가 필요하대요</p>
-        <div id="signalCustomMessageContainer" class="signal-custom-msg-box" style="display: none;">
+        <div
+          id="signalCustomMessageContainer"
+          class="signal-custom-msg-box is-hidden"
+        >
           <p id="signalCustomMessageText"></p>
         </div>
-        <button class="signal-confirm-btn" onclick="closeSignalOverlay()">
+        <button
+          type="button"
+          class="signal-confirm-btn"
+          id="signalConfirmCloseBtn"
+        >
           위로해 주러 가기
         </button>
       </div>
     </div>
 
-    <!-- Couple Connection Modal -->
-    <div id="coupleConnectionModal" class="modal-overlay bottom-sheet" role="dialog" aria-modal="true">
+    <!-- 커플 연결 모달 -->
+    <div
+      id="coupleConnectionModal"
+      class="modal-overlay bottom-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="coupleModalTitle"
+      aria-hidden="true"
+    >
       <div class="modal-content">
         <div class="modal-header">
-          <h3>우리만의 연결 공간</h3>
-          <button class="close-icon-btn" onclick="closeCoupleModal()"><i class="ti ti-x"></i></button>
+          <h3 id="coupleModalTitle">우리만의 연결 공간</h3>
+          <button
+            type="button"
+            class="close-icon-btn"
+            id="closeCoupleBtn"
+            aria-label="모달 닫기"
+          >
+            <i class="ti ti-x" aria-hidden="true"></i>
+          </button>
         </div>
         <div class="modal-body couple-modal-body">
-          <p class="modal-desc">기본 공용 채널을 벗어나, 우리 부부만 사용할 수 있는 고유한 암호화 공간을 생성하고 연결하세요.</p>
-          
+          <p class="modal-desc">
+            기본 공용 채널을 벗어나, 우리 부부만 사용할 수 있는 고유한 암호화
+            공간을 생성하고 연결하세요.
+          </p>
+
           <div class="couple-code-box">
             <span class="code-label">현재 나의 커플 코드</span>
             <div class="code-display-group">
-              <input type="text" id="myCoupleCodeDisplay" readonly value="DEMO-CHANNEL" />
-              <button class="glass-btn sm icon-text" onclick="copyCoupleCode()" style="margin-top: 0;">
-                <i class="ti ti-copy"></i> 복사
+              <label for="myCoupleCodeDisplay" class="sr-only"
+                >내 커플 코드</label
+              >
+              <input
+                type="text"
+                id="myCoupleCodeDisplay"
+                readonly
+                value="DEMO-CHANNEL"
+              />
+              <button
+                type="button"
+                class="glass-btn sm icon-text"
+                id="copyCoupleCodeBtn"
+              >
+                <i class="ti ti-copy" aria-hidden="true"></i> 복사
               </button>
             </div>
           </div>
-          
+
           <div class="couple-divider">
             <span>또는 상대방 코드와 연결하기</span>
           </div>
-          
+
           <div class="couple-input-box">
-            <input type="text" id="partnerCoupleCodeInput" placeholder="상대방의 커플 코드를 입력해 주세요 (예: MEC-XXXXXX)" maxlength="12" />
+            <label for="partnerCoupleCodeInput" class="sr-only"
+              >상대방 커플 코드</label
+            >
+            <input
+              type="text"
+              id="partnerCoupleCodeInput"
+              placeholder="상대방의 커플 코드를 입력해 주세요 (예: MEC-XXXXXX)"
+              maxlength="12"
+            />
           </div>
         </div>
-        <div class="modal-footer two-buttons" style="display: flex; gap: 8px;">
-          <button class="glass-btn" onclick="resetToDemoChannel()" style="flex: 1; padding: 12px 10px; font-size: 13px; margin-top: 0; border-radius: 12px;">
-            <i class="ti ti-rotate"></i> 공용 해제
+        <div class="modal-footer couple-modal-footer">
+          <button type="button" class="glass-btn" id="resetDemoBtn">
+            <i class="ti ti-rotate" aria-hidden="true"></i> 공용 해제
           </button>
-          <button class="glass-btn" onclick="generateNewCoupleCode()" style="flex: 1; padding: 12px 10px; font-size: 13px; margin-top: 0; border-radius: 12px;">
-            <i class="ti ti-circle-plus"></i> 새 코드
+          <button type="button" class="glass-btn" id="generateCodeBtn">
+            <i class="ti ti-circle-plus" aria-hidden="true"></i> 새 코드
           </button>
-          <button class="primary-btn" onclick="connectCoupleCode()" style="flex: 1.8; padding: 12px 10px; font-size: 13px; margin-top: 0; border-radius: 12px;">
-            <i class="ti ti-device-heart"></i> 연결하기
+          <button
+            type="button"
+            class="primary-btn connect-btn"
+            id="connectCoupleBtn"
+          >
+            <i class="ti ti-device-heart" aria-hidden="true"></i> 연결하기
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Notification Center Modal -->
-    <div id="notifCenterModal" class="modal-overlay bottom-sheet" role="dialog" aria-modal="true">
+    <!-- 알림 센터 모달 -->
+    <div
+      id="notifCenterModal"
+      class="modal-overlay bottom-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="notifCenterTitle"
+      aria-hidden="true"
+    >
       <div class="modal-content">
         <div class="modal-header">
-          <h3>알림 센터</h3>
-          <button class="close-icon-btn" onclick="closeNotifCenterModal()"><i class="ti ti-x"></i></button>
+          <h3 id="notifCenterTitle">알림 센터</h3>
+          <button
+            type="button"
+            class="close-icon-btn"
+            id="closeNotifCenterBtn"
+            aria-label="알림 센터 닫기"
+          >
+            <i class="ti ti-x" aria-hidden="true"></i>
+          </button>
         </div>
         <div class="modal-body notif-modal-body">
-          <div class="notif-control-row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--primary-soft); border-radius: 12px; margin-bottom: 16px;">
-            <span id="notifPermissionStatus" style="font-size: 13px; font-weight: 600; color: var(--text-main);">기기 알림: 미설정</span>
-            <button class="glass-btn sm" id="requestNotifPermBtn" style="margin-top: 0; padding: 6px 12px; font-size: 12px; border-radius: 8px;">알림 허용</button>
+          <div class="notif-control-row">
+            <span id="notifPermissionStatus" aria-live="polite"
+              >기기 알림: 미설정</span
+            >
+            <button type="button" class="glass-btn sm" id="requestNotifPermBtn">
+              알림 허용
+            </button>
           </div>
-          
-          <div id="notif-list-container" class="notif-list-container" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+
+          <div
+            id="notif-list-container"
+            class="notif-list-container"
+            aria-live="polite"
+            aria-label="알림 목록"
+          >
             <div class="notif-empty-state">
-              <i class="ti ti-bell-off"></i>
-              <p>아직 도착한 알림이 없어요.<br>서로에게 첫 번째 신호나 하트를 보내보세요!</p>
+              <i class="ti ti-bell-off" aria-hidden="true"></i>
+              <p>
+                아직 도착한 알림이 없어요.<br />서로에게 첫 번째 신호나 하트를
+                보내보세요!
+              </p>
             </div>
           </div>
         </div>
-        <div class="modal-footer notif-footer" style="padding-top: 16px;">
-          <button class="glass-btn full" onclick="clearAllNotifications()" style="width: 100%; border-radius: 12px; padding: 12px 0;">
-            <i class="ti ti-trash"></i> 알림 내역 전체 삭제
+        <div class="modal-footer notif-footer">
+          <button type="button" class="glass-btn full" id="clearAllNotifsBtn">
+            <i class="ti ti-trash" aria-hidden="true"></i> 알림 내역 전체 삭제
           </button>
         </div>
       </div>
